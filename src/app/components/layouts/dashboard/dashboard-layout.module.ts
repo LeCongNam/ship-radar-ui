@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NzBreadCrumbComponent, NzBreadCrumbItemComponent } from 'ng-zorro-antd/breadcrumb';
 import {
@@ -49,6 +49,9 @@ interface MenuItem {
   styleUrl: './dashboard-layout.scss',
 })
 export class DashboardLayout implements OnInit {
+  sidebarWidth = 200;
+  isResizing = false;
+
   isCollapsed = false;
   protected readonly date = new Date();
   private spinner = inject(NgxSpinnerService);
@@ -159,5 +162,27 @@ export class DashboardLayout implements OnInit {
       this.spinner.hide();
       this.isLoading = false;
     }, 1500); // Mock delay cho data
+  }
+
+  startResizing(event: MouseEvent) {
+    this.isResizing = true;
+    event.preventDefault();
+  }
+
+  @HostListener('window:mousemove', ['$event'])
+  onMouseMove(event: MouseEvent) {
+    if (!this.isResizing) {
+      return;
+    }
+
+    // Limit sidebar width between 200px and 500px
+    if (event.clientX >= 200 && event.clientX <= 500) {
+      this.sidebarWidth = event.clientX;
+    }
+  }
+
+  @HostListener('window:mouseup')
+  stopResizing() {
+    this.isResizing = false;
   }
 }

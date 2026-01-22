@@ -43,10 +43,55 @@ nz-footer {
 }
 
 nz-sider {
-  overflow: auto;
   height: 100%;
   position: fixed;
   left: 0;
+  z-index: 10;
+  // Remove overflow: auto to allow resizer to be positioned correctly if needed,
+  // or ensure resizer is fixed/absolute properly.
+  // If we keep overflow: auto, we need to make sure resizer doesn't scroll away.
+  // Better approach: Make sider content scrollable, but sider itself static.
+  // But updating that structure requires more HTML changes.
+  // For now, let's keep overflow: visible on sider and handle inner scroll if possible OR position resizer sticky.
+  // However, Ant Design nz-sider might put overflow hidden/auto.
+  // Let's try to override overflow to visible and handle content scroll.
+
+  // Actually, standard Ant Sider usually handles scroll inside.
+  // Let's make sure the resizer is visible.
+  position: relative; // Ant design sider is likely relative or has classes.
+  // Wait, the previous CSS said:
+  // position: fixed; left: 0;
+}
+
+// We need to override the previous fixed positioning if we want to rely on Ant's default or our width variable
+nz-sider {
+  overflow: visible; // Allow resizer to be on the edge
+  height: 100%;
+  position: fixed;
+  left: 0;
+
+  .sidebar-scroll-container {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
+.sidebar-resizer {
+  position: absolute;
+  top: 0;
+  right: -5px; // Extend slightly outside to be easily grabbable
+  width: 10px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 1000;
+  background: transparent;
+  transition: background 0.2s;
+
+  &:hover,
+  &.resizing {
+    background: rgba(24, 144, 255, 0.3); // Highlight on hover/active
+  }
 }
 
 nz-header {
@@ -54,12 +99,12 @@ nz-header {
   padding: 0;
   position: fixed;
   z-index: 1;
-  width: calc(100% - 200px);
+  width: calc(100% - var(--sidebar-width));
   transition: width 0.2s;
 }
 
 nz-layout>nz-layout {
-  margin-left: 200px;
+  margin-left: var(--sidebar-width);
   transition: margin-left 0.2s;
 }
 
