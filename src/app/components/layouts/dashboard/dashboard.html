@@ -3,42 +3,57 @@
     <p style="color: white">Waiting for data....</p>
   </ngx-spinner>
 } @else {
-  <nz-layout [class.collapsed]="isCollapsed">
-    <nz-sider nzCollapsible [(nzCollapsed)]="isCollapsed">
-      <a routerLink="/dashboard" class="logo-box">
-        <img src="/logo.svg" alt="logo" class="logo" />
-      </a>
+  <nz-layout [class.collapsed]="isCollapsed" [style.--sidebar-width.px]="sidebarWidth">
+    <nz-sider
+      nzCollapsible
+      [(nzCollapsed)]="isCollapsed"
+      [nzWidth]="sidebarWidth"
+      [nzTrigger]="null"
+    >
+      @if (!isCollapsed) {
+        <div
+          class="sidebar-resizer"
+          (mousedown)="startResizing($event)"
+          [class.resizing]="isResizing"
+        ></div>
+      }
 
-      <ul nz-menu nzTheme="dark" nzMode="inline">
-        @for (menu of menus; track menu.title) {
-          @if (menu.children) {
-            <li nz-submenu [nzTitle]="menu.title" [nzIcon]="menu.icon" [(nzOpen)]="menu.open">
-              <ul>
-                @for (child of menu.children; track child.link) {
-                  <li
-                    nz-menu-item
-                    [routerLink]="child.link"
-                    [routerLinkActive]="'ant-menu-item-selected'"
-                    [routerLinkActiveOptions]="{ exact: true }"
-                  >
-                    {{ child.title }}
-                  </li>
-                }
-              </ul>
-            </li>
-          } @else {
-            <li
-              nz-menu-item
-              [routerLink]="menu.link"
-              routerLinkActive="ant-menu-item-selected"
-              [routerLinkActiveOptions]="{ exact: true }"
-            >
-              <nz-icon [nzType]="menu.icon" />
-              <span>{{ menu.title }}</span>
-            </li>
+      <div class="sidebar-scroll-container">
+        <a routerLink="/dashboard" class="logo-box">
+          <img src="/logo.svg" alt="logo" class="logo" />
+        </a>
+
+        <ul nz-menu nzTheme="dark" nzMode="inline">
+          @for (menu of menus; track menu.title) {
+            @if (menu.children) {
+              <li nz-submenu [nzTitle]="menu.title" [nzIcon]="menu.icon" [(nzOpen)]="menu.open">
+                <ul>
+                  @for (child of menu.children; track child.link) {
+                    <li
+                      nz-menu-item
+                      [routerLink]="child.link"
+                      [routerLinkActive]="'ant-menu-item-selected'"
+                      [routerLinkActiveOptions]="{ exact: true }"
+                    >
+                      {{ child.title }}
+                    </li>
+                  }
+                </ul>
+              </li>
+            } @else {
+              <li
+                nz-menu-item
+                [routerLink]="menu.link"
+                routerLinkActive="ant-menu-item-selected"
+                [routerLinkActiveOptions]="{ exact: true }"
+              >
+                <nz-icon [nzType]="menu.icon" />
+                <span>{{ menu.title }}</span>
+              </li>
+            }
           }
-        }
-      </ul>
+        </ul>
+      </div>
     </nz-sider>
 
     <nz-layout>
