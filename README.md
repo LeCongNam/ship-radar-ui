@@ -2,6 +2,13 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.13.
 
+## 📚 Documentation
+
+- **[ROUTES_SIDEBAR_SYNC.md](ROUTES_SIDEBAR_SYNC.md)** - ⚠️ **BẮT BUỘC ĐỌC**: Đảm bảo routes và sidebar khớp nhau
+- **[SIDEBAR_GUIDE.md](SIDEBAR_GUIDE.md)** - ⭐ Hướng dẫn thêm menu vào sidebar khi tạo page mới
+- **[README_CRUD_IMPLEMENTATION.md](README_CRUD_IMPLEMENTATION.md)** - Tổng quan về các CRUD pages đã implement
+- **[IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md)** - Template code để tạo các model còn lại
+
 ## Development server
 
 To start a local development server, run:
@@ -11,6 +18,17 @@ ng serve
 ```
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+
+## ⚠️ Important: Adding New Pages
+
+**Whenever you create a new page/module, you MUST add it to the sidebar!**
+
+See [SIDEBAR_GUIDE.md](SIDEBAR_GUIDE.md) for detailed instructions.
+
+Quick steps:
+1. Open `src/app/components/layouts/dashboard/dashboard-layout.module.ts`
+2. Add your menu item to the `menus` array
+3. Test the navigation
 
 ## Code scaffolding
 

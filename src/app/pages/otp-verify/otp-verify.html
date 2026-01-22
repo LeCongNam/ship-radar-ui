@@ -1,0 +1,28 @@
+<div class="container">
+
+  <div class="title">
+    <h2>Vui lòng nhập mã otp từ email</h2>
+
+    <p>Kiểm tra hộp thư tin nhắn đến hoặc hòm thư rác </p>
+  </div>
+
+  <ng-otp-input
+    [formControl]="otpControl"
+    [config]="{ length: 6, allowNumbersOnly: true, }"
+    (onInputChange)="handleOtpChange($event)">
+  >
+  </ng-otp-input>
+
+
+  <button (click)="callApiGetOtp()" [disabled]="bntResendOtpDisabled" [class.btn-disable]="bntResendOtpDisabled">
+    @if(bntResendOtpDisabled){
+
+      Gửi lại mã OTP sau {{ timer }} giây
+    }  @else{
+      Gửi lại mã OTP
+
+    }
+  </button>
+
+
+</div>

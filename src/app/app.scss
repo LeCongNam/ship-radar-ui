@@ -1,0 +1,53 @@
+/* SAP UI Classic Style */
+.sap-ui-classic-modal {
+  .ant-modal-content {
+    border-radius: 0; /* SAP cổ điển không bo góc */
+    border: 1px solid #666;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+  }
+
+  .ant-modal-header {
+    background-color: #cc1919; /* Màu đỏ đặc trưng SAP Error */
+    border-bottom: 2px solid #a31414;
+    border-radius: 0;
+    padding: 10px 15px;
+  }
+
+  .ant-modal-title {
+    color: #ffffff !important;
+    font-family: "7Step", Arial, sans-serif;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+
+  .ant-modal-body {
+    background-color: #f2f2f2; /* Màu nền xám nhạt */
+    color: #333;
+    font-size: 14px;
+    padding: 20px;
+  }
+
+  .ant-btn {
+    border-radius: 0; /* Nút bấm vuông */
+    border: 1px solid #333;
+    background: #e5e5e5;
+    color: #000;
+    &:hover { background: #d5d5d5; border-color: #000; }
+  }
+}
+
+
+.flex{
+  display: flex;
+
+  &.justify-center{
+    justify-content: center;
+  }
+  &.align-center{
+    align-items: center;
+  }
+
+  .justify-end{
+    justify-content: flex-end;
+  }
+}

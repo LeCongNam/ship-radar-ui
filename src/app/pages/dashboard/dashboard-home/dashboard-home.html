@@ -1,0 +1,81 @@
+<app-dashboard-layout>
+  <!-- Thống kê tổng quan -->
+  <div nz-row [nzGutter]="16" class="summary-cards">
+    <div nz-col [nzSpan]="6">
+      <nz-card>
+        <nz-statistic
+          [nzValue]="summary.today"
+          [nzTitle]="'Doanh thu hôm nay'"
+          [nzPrefix]="'đ'"
+          [nzValueStyle]="{ color: '#3f8600' }"
+        ></nz-statistic>
+      </nz-card>
+    </div>
+    <div nz-col [nzSpan]="6">
+      <nz-card>
+        <nz-statistic
+          [nzValue]="summary.thisWeek"
+          [nzTitle]="'Doanh thu tuần này'"
+          [nzPrefix]="'đ'"
+          [nzValueStyle]="{ color: '#1890ff' }"
+        ></nz-statistic>
+      </nz-card>
+    </div>
+    <div nz-col [nzSpan]="6">
+      <nz-card>
+        <nz-statistic
+          [nzValue]="summary.thisMonth"
+          [nzTitle]="'Doanh thu tháng này'"
+          [nzPrefix]="'đ'"
+          [nzValueStyle]="{ color: '#cf1322' }"
+        ></nz-statistic>
+      </nz-card>
+    </div>
+    <div nz-col [nzSpan]="6">
+      <nz-card>
+        <nz-statistic
+          [nzValue]="summary.totalOrders"
+          [nzTitle]="'Tổng đơn hàng'"
+          [nzSuffix]="'đơn'"
+        ></nz-statistic>
+      </nz-card>
+    </div>
+  </div>
+
+  <!-- Status boxes -->
+  <div class="status-box">
+    <a routerLink="/dashboard/orders/list" class="box-1">
+      <h3>Số lượng đơn hàng cần xử lí</h3>
+      <p>500 đơn hàng</p>
+    </a>
+    <a routerLink="/dashboard/orders/list" class="box-2">
+      <h3>Đơn hoả tốc</h3>
+      <p>200 đơn hàng</p>
+    </a>
+    <a routerLink="/dashboard/orders/list" class="box-3">
+      <h3>Số lượng đơn hàng đang đóng gói</h3>
+      <p>50 đơn hàng</p>
+    </a>
+    <a routerLink="/dashboard/orders/list" class="box-4">
+      <h3>Số lượng đơn hàng chờ giao</h3>
+      <p>100 đơn hàng</p>
+    </a>
+  </div>
+
+  <!-- Charts -->
+  <div nz-row [nzGutter]="16" class="chart-section">
+    <!-- Chart doanh thu theo ngày -->
+    <div nz-col [nzSpan]="12" [nzXs]="24">
+      <nz-card [nzTitle]="'Doanh thu theo ngày'">
+        <div echarts [options]="dailyChartOptions" class="chart-container"></div>
+      </nz-card>
+    </div>
+
+    <!-- Chart doanh thu theo tháng -->
+    <div nz-col [nzSpan]="12" [nzXs]="24">
+      <nz-card [nzTitle]="'Doanh thu theo tháng'">
+        <div echarts [options]="monthlyChartOptions" class="chart-container"></div>
+      </nz-card>
+    </div>
+  </div>
+</app-dashboard-layout>

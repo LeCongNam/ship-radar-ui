@@ -1,0 +1,198 @@
+.input-container {
+  max-width: 500px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.input-wrapper {
+  margin-bottom: 1.5rem;
+  position: relative;
+
+  input {
+    font-size: 1rem;
+    padding-right: 2.5rem;
+  }
+
+  .loading-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: #1890ff;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: translateY(-50%) rotate(0deg);
+  }
+
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+
+  button {
+    flex: 1;
+  }
+}
+
+.cards-section {
+  margin: 2rem auto;
+  max-width: 1400px;
+  padding: 0 2rem;
+
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+    margin: 1rem auto;
+  }
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f1f1f;
+  margin-bottom: 1.5rem;
+
+  @media (max-width: 768px) {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+}
+
+.cards-wrapper {
+  position: relative;
+  min-height: 400px;
+
+  @media (max-width: 768px) {
+    min-height: 500px;
+  }
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex !important;
+  align-items: flex-start; // Căn lên trên thay vì giữa
+  justify-content: center;
+  padding-top: 100px; // Cách top một khoảng
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 50;
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  border-radius: 8px;
+
+  @media (max-width: 768px) {
+    padding-top: 60px; // Mobile cách top ít hơn
+    align-items: flex-start;
+  }
+
+  // Cấu hình hiển thị cho nz-spin
+  nz-spin {
+    display: block;
+    transform: scale(1.5); // Tăng kích thước spinner
+
+    @media (max-width: 768px) {
+      transform: scale(1.2);
+    }
+  }
+
+  ::ng-deep .ant-spin {
+    color: #1890ff;
+  }
+}
+
+.loading-state {
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+.ship-card {
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 3px solid #e8e8e8 !important;
+  border-radius: 16px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    border-color: #1890ff !important;
+  }
+
+  .ship-image {
+    height: 200px;
+    object-fit: cover;
+  }
+
+  .ship-info {
+    margin-top: 1rem;
+
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      color: #666;
+
+      .status {
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 4px;
+
+        &.en-route {
+          color: #1890ff;
+          background: #e6f7ff;
+        }
+
+        &.docked {
+          color: #52c41a;
+          background: #f6ffed;
+        }
+
+        &.maintenance {
+          color: #fa8c16;
+          background: #fff7e6;
+        }
+      }
+    }
+  }
+}
+
+.end-of-data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+  padding: 1rem 0;
+
+  .divider-line {
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(to right, transparent, #d9d9d9, transparent);
+    max-width: 200px;
+  }
+
+  .end-text {
+    font-size: 0.9rem;
+    color: #999;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+}

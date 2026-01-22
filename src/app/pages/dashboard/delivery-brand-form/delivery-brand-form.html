@@ -1,0 +1,112 @@
+<app-dashboard-layout>
+  <div class="page-header">
+    <h2>{{ isEditMode ? 'Chỉnh sửa đối tác vận chuyển' : 'Tạo đối tác vận chuyển mới' }}</h2>
+  </div>
+
+  <div class="form-container">
+    <form nz-form [formGroup]="brandForm" (ngSubmit)="onSubmit()" nzLayout="vertical">
+      <div class="form-section">
+        <h3>Thông tin liên hệ</h3>
+
+        <div class="grid grid-cols-2 gap-4">
+          <nz-form-item>
+            <nz-form-label nzRequired>Tên đối tác</nz-form-label>
+            <nz-form-control nzErrorTip="Vui lòng nhập tên đối tác vận chuyển">
+              <input nz-input formControlName="name" placeholder="Tên đối tác vận chuyển" />
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label>Website</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="website" placeholder="Website" />
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label>Email hỗ trợ</nz-form-label>
+            <nz-form-control nzErrorTip="Email không hợp lệ">
+              <input nz-input formControlName="supportEmail" placeholder="Email hỗ trợ" />
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label>Số điện thoại hỗ trợ</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="supportPhone" placeholder="Số điện thoại hỗ trợ" />
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label>Hotline</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="hotline" placeholder="Hotline" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Thời gian hoạt động</h3>
+
+        <div class="grid grid-cols-2 gap-4">
+          <nz-form-item>
+            <nz-form-label>Giờ mở cửa</nz-form-label>
+            <nz-form-control>
+              <nz-time-picker formControlName="opening_time" nzFormat="HH:mm"></nz-time-picker>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label>Giờ đóng cửa</nz-form-label>
+            <nz-form-control>
+              <nz-time-picker formControlName="closing_time" nzFormat="HH:mm"></nz-time-picker>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label>Thời gian lấy hàng từ</nz-form-label>
+            <nz-form-control>
+              <nz-time-picker formControlName="time_pickup_from" nzFormat="HH:mm"></nz-time-picker>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label>Thời gian lấy hàng đến</nz-form-label>
+            <nz-form-control>
+              <nz-time-picker formControlName="time_pickup_to" nzFormat="HH:mm"></nz-time-picker>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item class="col-span-2">
+            <nz-form-label>Giờ hoạt động (Ghi chú)</nz-form-label>
+            <nz-form-control>
+              <input
+                nz-input
+                formControlName="operating_hours"
+                placeholder="Ví dụ: Thứ 2 - Thứ 6"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Trạng thái</h3>
+
+        <nz-form-item>
+          <nz-form-control>
+            <label nz-checkbox formControlName="isActive">Kích hoạt đối tác</label>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" nz-button (click)="goBack()">Hủy</button>
+        <button type="submit" nz-button nzType="primary" [nzLoading]="loading">
+          {{ isEditMode ? 'Cập nhật' : 'Tạo mới' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</app-dashboard-layout>

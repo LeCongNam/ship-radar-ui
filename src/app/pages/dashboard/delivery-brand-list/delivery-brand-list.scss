@@ -1,0 +1,53 @@
+.page-header {
+  margin-bottom: 24px;
+
+  h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+.button-add-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 16px;
+
+  .box-search {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+
+    input {
+      padding-right: 40px;
+    }
+
+    .search-box {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+
+      .icon-search {
+        font-size: 16px;
+        color: #999;
+      }
+    }
+  }
+}
+
+.pagination {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.text-danger {
+  color: #ff4d4f;
+
+  &:hover {
+    color: #ff7875;
+  }
+}

@@ -1,0 +1,90 @@
+<div class="input-container">
+  <div class="input-wrapper">
+    <input
+      #inputField
+      nz-input
+      type="text"
+      placeholder="Tìm kiếm tàu theo tên, loại hoặc vị trí..."
+      [ngModel]="inputValue()"
+      (ngModelChange)="onInputChange($event)"
+    />
+    @if (isLoading()) {
+      <span nz-icon nzType="loading" nzTheme="outline" class="loading-icon"></span>
+    }
+  </div>
+
+  <div class="button-group">
+    <button nz-button nzType="primary" (click)="onCheck()" type="button">
+      <span nz-icon nzType="check" nzTheme="outline"></span>
+      Check
+    </button>
+
+    <button nz-button nzDanger (click)="onClear()" type="button">
+      <span nz-icon nzType="close" nzTheme="outline"></span>
+      Clear
+    </button>
+  </div>
+</div>
+
+<div class="cards-section">
+  <h2 class="section-title">Ship Tracking</h2>
+
+  <div class="cards-wrapper">
+    @if (isLoading()) {
+      <div class="loading-overlay">
+        <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
+      </div>
+    }
+
+    <div nz-row [nzGutter]="[16, 16]" [class.loading-state]="isLoading()">
+      @if (isLoading()) {
+        @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+          <div nz-col [nzXs]="24" [nzSm]="24" [nzMd]="12" [nzLg]="8" [nzXl]="8">
+            <nz-card class="ship-card">
+              <nz-skeleton
+                [nzActive]="true"
+                [nzAvatar]="{ size: 'large', shape: 'square' }"
+                [nzParagraph]="{ rows: 3 }"
+              ></nz-skeleton>
+            </nz-card>
+          </div>
+        }
+      } @else {
+        @for (ship of ships(); track ship.id) {
+          <div nz-col [nzXs]="24" [nzSm]="24" [nzMd]="12" [nzLg]="8" [nzXl]="8">
+            <nz-card class="ship-card" [nzCover]="coverTemplate">
+              <ng-template #coverTemplate>
+                <img [alt]="ship.name" [src]="ship.image" class="ship-image" />
+              </ng-template>
+              <nz-card-meta [nzTitle]="ship.name" [nzDescription]="ship.type"></nz-card-meta>
+              <div class="ship-info">
+                <div class="info-row">
+                  <span nz-icon nzType="environment" nzTheme="outline"></span>
+                  <span>{{ ship.location }}</span>
+                </div>
+                <div class="info-row">
+                  <span nz-icon nzType="flag" nzTheme="outline"></span>
+                  <span
+                    class="status"
+                    [class.en-route]="ship.status === 'En Route'"
+                    [class.docked]="ship.status === 'Docked'"
+                    [class.maintenance]="ship.status === 'Maintenance'"
+                    >{{ ship.status }}</span
+                  >
+                </div>
+              </div>
+            </nz-card>
+          </div>
+        }
+      }
+    </div>
+  </div>
+
+  @if (!isLoading()) {
+    <div class="end-of-data">
+      <div class="divider-line"></div>
+      <span class="end-text">Đã hiển thị tất cả dữ liệu</span>
+      <div class="divider-line"></div>
+    </div>
+  }
+</div>

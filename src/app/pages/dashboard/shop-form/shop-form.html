@@ -1,0 +1,56 @@
+<app-dashboard-layout>
+  <div class="page-header">
+    <h2>{{ isEditMode ? 'Chỉnh sửa cửa hàng' : 'Tạo cửa hàng mới' }}</h2>
+  </div>
+
+  <div class="form-container">
+    <form nz-form [formGroup]="shopForm" (ngSubmit)="onSubmit()" nzLayout="vertical">
+      <div class="form-section">
+        <h3>Thông tin cửa hàng</h3>
+
+        <nz-form-item>
+          <nz-form-label nzRequired>Tên cửa hàng</nz-form-label>
+          <nz-form-control nzErrorTip="Vui lòng nhập tên cửa hàng">
+            <input nz-input formControlName="name" placeholder="Tên cửa hàng" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label nzRequired>Số điện thoại</nz-form-label>
+          <nz-form-control nzErrorTip="Vui lòng nhập số điện thoại hợp lệ (10-11 số)">
+            <input nz-input formControlName="phone" placeholder="Số điện thoại" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label nzRequired>Địa chỉ</nz-form-label>
+          <nz-form-control nzErrorTip="Vui lòng nhập địa chỉ">
+            <textarea
+              nz-input
+              formControlName="address"
+              placeholder="Địa chỉ cửa hàng"
+              [nzAutosize]="{ minRows: 2, maxRows: 6 }"
+            ></textarea>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div class="form-section">
+        <h3>Trạng thái</h3>
+
+        <nz-form-item>
+          <nz-form-control>
+            <label nz-checkbox formControlName="isActive">Hoạt động</label>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" nz-button (click)="goBack()">Hủy</button>
+        <button type="submit" nz-button nzType="primary" [nzLoading]="loading">
+          {{ isEditMode ? 'Cập nhật' : 'Tạo mới' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</app-dashboard-layout>

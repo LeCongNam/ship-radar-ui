@@ -1,0 +1,88 @@
+.trigger {
+  font-size: 18px;
+  line-height: 64px;
+  padding: 0 24px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.trigger:hover {
+  color: #1890ff;
+}
+
+.logo-box {
+  height: 64px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+nz-header {
+  background: #fff;
+  padding: 0;
+}
+
+nz-content {
+  margin: 0 16px;
+}
+
+nz-breadcrumb {
+  margin: 16px 0;
+}
+
+.inner-content {
+  padding: 24px;
+  background: #fff;
+  min-height: 360px;
+}
+
+nz-footer {
+  text-align: center;
+}
+
+nz-sider {
+  overflow: auto;
+  height: 100%;
+  position: fixed;
+  left: 0;
+}
+
+nz-header {
+  background: #fff;
+  padding: 0;
+  position: fixed;
+  z-index: 1;
+  width: calc(100% - 200px);
+  transition: width 0.2s;
+}
+
+nz-layout>nz-layout {
+  margin-left: 200px;
+  transition: margin-left 0.2s;
+}
+
+nz-content {
+  margin: 80px 16px 0;
+}
+
+.content {
+  padding: 20px;
+  min-height: calc(100vh - 64px - 72px);
+  border-radius: 12px;
+  box-shadow:
+    rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
+    rgb(209, 213, 219) 0px 0px 0px 1px inset;
+}
+
+// When sidebar is collapsed
+nz-layout.collapsed {
+  nz-header {
+    width: calc(100% - 80px);
+  }
+
+  &>nz-layout {
+    margin-left: 80px;
+  }
+}

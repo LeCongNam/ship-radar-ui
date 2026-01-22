@@ -1,0 +1,195 @@
+<app-dashboard-layout>
+  <div class="page-header">
+    <h2>Quản lý người dùng</h2>
+  </div>
+
+  <div class="button-add-box">
+    <div class="box-search">
+      <input
+        nz-input
+        placeholder="Tìm kiếm người dùng"
+        [(ngModel)]="searchText"
+        (ngModelChange)="onSearch()"
+      />
+      <div class="search-box">
+        <nz-icon nzType="search" nzTheme="outline" class="icon-search"></nz-icon>
+      </div>
+    </div>
+
+    <button nz-button nzType="primary" (click)="navigateToCreate()">
+      <nz-icon nzType="plus" nzTheme="outline" />
+      Thêm người dùng
+    </button>
+  </div>
+
+  <div>
+    <nz-table
+      #basicTable
+      [nzData]="listOfData"
+      [nzLoading]="loading"
+      nzShowPagination="false"
+      nzBordered
+    >
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Email</th>
+          <th>Tên</th>
+          <th>Username</th>
+          <th>Số điện thoại</th>
+          <th>Trạng thái</th>
+          <th>Ngày tạo</th>
+          <th>Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (data of basicTable.data; track data.id) {
+          <tr>
+            <td>
+              <a [routerLink]="['/dashboard/users/edit', data.id]">{{ data.id }}</a>
+            </td>
+            <td>{{ data.email }}</td>
+            <td>{{ data.firstName }} {{ data.lastName }}</td>
+            <td>{{ data.username }}</td>
+            <td>{{ data.phoneNumber }}</td>
+            <td>
+              <nz-switch
+                [ngModel]="data.isActive"
+                [nzControl]="true"
+                [nzLoading]="loading"
+                (click)="confirmStatusChange(data)"
+              ></nz-switch>
+            </td>
+            <td>{{ data.createdAt | date: 'dd/MM/yyyy' }}</td>
+            <td>
+              <a (click)="showDetail(data)">Xem</a>
+              <nz-divider nzType="vertical"></nz-divider>
+              <a (click)="showQuickEdit(data)">Sửa nhanh</a>
+              <nz-divider nzType="vertical"></nz-divider>
+              <a (click)="delete(data.id)" class="text-danger">Xóa</a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </div>
+
+  <div class="pagination">
+    <nz-pagination
+      [nzPageIndex]="pageIndex"
+      [nzTotal]="total"
+      [nzPageSize]="pageSize"
+      [nzPageSizeOptions]="[10, 20, 50]"
+      (nzPageIndexChange)="onPageChange($event)"
+      (nzPageSizeChange)="onPageSizeChange($event)"
+      [nzShowSizeChanger]="true"
+    >
+    </nz-pagination>
+  </div>
+</app-dashboard-layout>
+
+<nz-drawer
+  [nzVisible]="drawerVisible"
+  [nzWidth]="720"
+  [nzTitle]="drawerTitle"
+  (nzOnClose)="closeDrawer()"
+>
+  @if (selectedUser) {
+    @if (isEditMode) {
+      <form nz-form [formGroup]="editForm" (ngSubmit)="saveQuickEdit()">
+        <nz-form-item>
+          <nz-form-label nzRequired>Email</nz-form-label>
+          <nz-form-control>
+            <input nz-input formControlName="email" placeholder="Email" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label>Họ</nz-form-label>
+          <nz-form-control>
+            <input nz-input formControlName="firstName" placeholder="Họ" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label>Tên</nz-form-label>
+          <nz-form-control>
+            <input nz-input formControlName="lastName" placeholder="Tên" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label nzRequired>Username</nz-form-label>
+          <nz-form-control>
+            <input nz-input formControlName="username" placeholder="Username" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label>Số điện thoại</nz-form-label>
+          <nz-form-control>
+            <input nz-input formControlName="phoneNumber" placeholder="Số điện thoại" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label>Bio</nz-form-label>
+          <nz-form-control>
+            <textarea
+              nz-input
+              formControlName="bio"
+              placeholder="Bio"
+              [nzAutosize]="{ minRows: 3, maxRows: 6 }"
+            ></textarea>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label>Trạng thái</nz-form-label>
+          <nz-form-control>
+            <label nz-checkbox formControlName="isActive">Hoạt động</label>
+          </nz-form-control>
+        </nz-form-item>
+
+        <div class="drawer-footer">
+          <button type="button" nz-button (click)="closeDrawer()">Hủy</button>
+          <button type="submit" nz-button nzType="primary" [nzLoading]="loading">Lưu</button>
+        </div>
+      </form>
+    } @else {
+      <nz-descriptions nzBordered [nzColumn]="1">
+        <nz-descriptions-item nzTitle="ID">{{ selectedUser.id }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Email">{{ selectedUser.email }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Họ và tên">
+          {{ selectedUser.firstName }} {{ selectedUser.lastName }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Username">{{ selectedUser.username }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Số điện thoại">{{
+          selectedUser.phoneNumber
+        }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Bio">{{ selectedUser.bio }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Email xác thực">
+          <nz-tag [nzColor]="selectedUser.isVerifyEmail ? 'green' : 'red'">
+            {{ selectedUser.isVerifyEmail ? 'Đã xác thực' : 'Chưa xác thực' }}
+          </nz-tag>
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="SĐT xác thực">
+          <nz-tag [nzColor]="selectedUser.isVerifyPhone ? 'green' : 'red'">
+            {{ selectedUser.isVerifyPhone ? 'Đã xác thực' : 'Chưa xác thực' }}
+          </nz-tag>
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Trạng thái">
+          <nz-tag [nzColor]="selectedUser.isActive ? 'green' : 'red'">
+            {{ selectedUser.isActive ? 'Hoạt động' : 'Tạm khóa' }}
+          </nz-tag>
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Ngày tạo">
+          {{ selectedUser.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Ngày cập nhật">
+          {{ selectedUser.updatedAt | date: 'dd/MM/yyyy HH:mm' }}
+        </nz-descriptions-item>
+      </nz-descriptions>
+    }
+  }
+</nz-drawer>

@@ -1,0 +1,49 @@
+<app-dashboard-layout>
+  <div class="page-header">
+    <h2>{{ isEditMode ? 'Chỉnh sửa danh mục' : 'Tạo danh mục mới' }}</h2>
+  </div>
+
+  <div class="form-container">
+    <form nz-form [formGroup]="categoryForm" (ngSubmit)="onSubmit()" nzLayout="vertical">
+      <div class="form-section">
+        <h3>Thông tin danh mục</h3>
+
+        <nz-form-item>
+          <nz-form-label nzRequired>Tên danh mục</nz-form-label>
+          <nz-form-control nzErrorTip="Vui lòng nhập tên danh mục">
+            <input nz-input formControlName="name" placeholder="Tên danh mục" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label>Mô tả</nz-form-label>
+          <nz-form-control>
+            <textarea
+              nz-input
+              formControlName="description"
+              placeholder="Mô tả danh mục"
+              [nzAutosize]="{ minRows: 4, maxRows: 8 }"
+            ></textarea>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div class="form-section">
+        <h3>Trạng thái</h3>
+
+        <nz-form-item>
+          <nz-form-control>
+            <label nz-checkbox formControlName="isActive">Kích hoạt danh mục</label>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" nz-button (click)="goBack()">Hủy</button>
+        <button type="submit" nz-button nzType="primary" [nzLoading]="loading">
+          {{ isEditMode ? 'Cập nhật' : 'Tạo mới' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</app-dashboard-layout>

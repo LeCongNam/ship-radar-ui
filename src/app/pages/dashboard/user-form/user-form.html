@@ -1,0 +1,110 @@
+<app-dashboard-layout>
+  <div class="page-header">
+    <h2>{{ isEditMode ? 'Chỉnh sửa người dùng' : 'Tạo người dùng mới' }}</h2>
+  </div>
+
+  <div class="form-container">
+    <form nz-form [formGroup]="userForm" (ngSubmit)="onSubmit()" nzLayout="vertical">
+      <div class="form-section">
+        <h3>Thông tin cơ bản</h3>
+
+        <nz-form-item>
+          <nz-form-label nzRequired>Email</nz-form-label>
+          <nz-form-control nzErrorTip="Vui lòng nhập email hợp lệ">
+            <input nz-input formControlName="email" placeholder="example@email.com" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label nzRequired>Username</nz-form-label>
+          <nz-form-control nzErrorTip="Vui lòng nhập username">
+            <input nz-input formControlName="username" placeholder="username" />
+          </nz-form-control>
+        </nz-form-item>
+
+        @if (!isEditMode) {
+          <nz-form-item>
+            <nz-form-label nzRequired>Mật khẩu</nz-form-label>
+            <nz-form-control nzErrorTip="Mật khẩu phải có ít nhất 6 ký tự">
+              <input nz-input type="password" formControlName="password" placeholder="******" />
+            </nz-form-control>
+          </nz-form-item>
+        }
+
+        <div nz-row [nzGutter]="16">
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label>Họ</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="firstName" placeholder="Nguyễn" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label>Tên</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="lastName" placeholder="Văn A" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+
+        <nz-form-item>
+          <nz-form-label>Số điện thoại</nz-form-label>
+          <nz-form-control>
+            <input nz-input formControlName="phoneNumber" placeholder="0900000000" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label>Ngày sinh</nz-form-label>
+          <nz-form-control>
+            <nz-date-picker formControlName="dob" class="full-width"></nz-date-picker>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label>Bio</nz-form-label>
+          <nz-form-control>
+            <textarea
+              nz-input
+              formControlName="bio"
+              placeholder="Giới thiệu về bản thân"
+              [nzAutosize]="{ minRows: 4, maxRows: 8 }"
+            ></textarea>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div class="form-section">
+        <h3>Trạng thái</h3>
+
+        <nz-form-item>
+          <nz-form-control>
+            <label nz-checkbox formControlName="isActive">Kích hoạt tài khoản</label>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-control>
+            <label nz-checkbox formControlName="isVerifyEmail">Email đã xác thực</label>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-control>
+            <label nz-checkbox formControlName="isVerifyPhone">SĐT đã xác thực</label>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" nz-button (click)="goBack()">Hủy</button>
+        <button type="submit" nz-button nzType="primary" [nzLoading]="loading">
+          {{ isEditMode ? 'Cập nhật' : 'Tạo mới' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</app-dashboard-layout>

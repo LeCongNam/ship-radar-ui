@@ -1,0 +1,95 @@
+<app-dashboard-layout>
+  <div class="page-header">
+    <h2>{{ isEditMode ? 'Chỉnh sửa sản phẩm' : 'Tạo sản phẩm mới' }}</h2>
+  </div>
+
+  <div class="form-container">
+    <form nz-form [formGroup]="productForm" (ngSubmit)="onSubmit()" nzLayout="vertical">
+      <div class="form-section">
+        <h3>Thông tin sản phẩm</h3>
+
+        <nz-form-item>
+          <nz-form-label nzRequired>Tên sản phẩm</nz-form-label>
+          <nz-form-control nzErrorTip="Vui lòng nhập tên sản phẩm">
+            <input nz-input formControlName="name" placeholder="Tên sản phẩm" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label nzRequired>SKU</nz-form-label>
+          <nz-form-control nzErrorTip="Vui lòng nhập SKU">
+            <input nz-input formControlName="sku" placeholder="SKU-00001" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <div nz-row [nzGutter]="16">
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>Giá</nz-form-label>
+              <nz-form-control nzErrorTip="Vui lòng nhập giá">
+                <nz-input-number
+                  formControlName="price"
+                  [nzMin]="0"
+                  [nzStep]="1000"
+                  class="full-width"
+                ></nz-input-number>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>Tồn kho</nz-form-label>
+              <nz-form-control nzErrorTip="Vui lòng nhập số lượng">
+                <nz-input-number
+                  formControlName="stock"
+                  [nzMin]="0"
+                  class="full-width"
+                ></nz-input-number>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+
+        <nz-form-item>
+          <nz-form-label nzRequired>Danh mục</nz-form-label>
+          <nz-form-control nzErrorTip="Vui lòng chọn danh mục">
+            <nz-select formControlName="categoryId" nzPlaceHolder="Chọn danh mục">
+              @for (category of categories; track category.id) {
+                <nz-option [nzValue]="category.id" [nzLabel]="category.name"></nz-option>
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label>Mô tả</nz-form-label>
+          <nz-form-control>
+            <textarea
+              nz-input
+              formControlName="description"
+              placeholder="Mô tả sản phẩm"
+              [nzAutosize]="{ minRows: 4, maxRows: 8 }"
+            ></textarea>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div class="form-section">
+        <h3>Trạng thái</h3>
+
+        <nz-form-item>
+          <nz-form-control>
+            <label nz-checkbox formControlName="isActive">Kích hoạt sản phẩm</label>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" nz-button (click)="goBack()">Hủy</button>
+        <button type="submit" nz-button nzType="primary" [nzLoading]="loading">
+          {{ isEditMode ? 'Cập nhật' : 'Tạo mới' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</app-dashboard-layout>

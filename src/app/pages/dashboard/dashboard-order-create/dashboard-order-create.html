@@ -1,0 +1,193 @@
+<app-dashboard-layout>
+  <div class="page-header">
+    <h2>Tạo đơn hàng mới</h2>
+  </div>
+
+  <div class="form-container">
+    <form nz-form [formGroup]="orderForm" (ngSubmit)="onSubmit()" nzLayout="vertical">
+      <!-- General Info -->
+      <div class="form-section">
+        <h3>Thông tin chung</h3>
+
+        <div class="grid grid-cols-2 gap-4">
+          <nz-form-item>
+            <nz-form-label nzRequired>Cửa hàng</nz-form-label>
+            <nz-form-control nzErrorTip="Vui lòng chọn cửa hàng">
+              <nz-select
+                formControlName="shopId"
+                nzPlaceHolder="Chọn cửa hàng"
+                [nzLoading]="shopsLoading"
+              >
+                @for (shop of shops; track shop.id) {
+                  <nz-option
+                    [nzValue]="shop.id"
+                    [nzLabel]="shop.name + ' : ' + shop.address"
+                  ></nz-option>
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label nzRequired>Trạng thái</nz-form-label>
+            <nz-form-control nzErrorTip="Vui lòng chọn trạng thái">
+              <nz-select formControlName="status" nzPlaceHolder="Chọn trạng thái">
+                <nz-option nzValue="PENDING" nzLabel="Chờ xử lý"></nz-option>
+                <nz-option nzValue="PACKING" nzLabel="Đang đóng gói"></nz-option>
+                <nz-option nzValue="PROCESSING" nzLabel="Đang xử lý"></nz-option>
+                <nz-option nzValue="SHIPPING" nzLabel="Đang giao hàng"></nz-option>
+                <nz-option nzValue="COMPLETED" nzLabel="Hoàn thành"></nz-option>
+                <nz-option nzValue="CANCELLED" nzLabel="Đã hủy"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <!-- Receiver Info -->
+      <div class="form-section">
+        <h3>Thông tin người nhận</h3>
+
+        <div class="grid grid-cols-2 gap-4">
+          <nz-form-item>
+            <nz-form-label nzRequired>Tên người nhận</nz-form-label>
+            <nz-form-control nzErrorTip="Vui lòng nhập tên người nhận">
+              <input nz-input formControlName="receiverName" placeholder="Tên người nhận" />
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label nzRequired>Số điện thoại</nz-form-label>
+            <nz-form-control nzErrorTip="Vui lòng nhập số điện thoại hợp lệ">
+              <input nz-input formControlName="receiverPhone" placeholder="Số điện thoại" />
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item class="col-span-2">
+            <nz-form-label nzRequired>Địa chỉ người nhận</nz-form-label>
+            <nz-form-control nzErrorTip="Vui lòng nhập địa chỉ nhận hàng">
+              <input nz-input formControlName="receiverAddress" placeholder="Địa chỉ chi tiết" />
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item class="col-span-2">
+            <nz-form-label>Ghi chú</nz-form-label>
+            <nz-form-control>
+              <textarea
+                nz-input
+                formControlName="noted"
+                placeholder="Ghi chú đơn hàng"
+                [nzAutosize]="{ minRows: 2, maxRows: 6 }"
+              ></textarea>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <!-- Order Items -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3>Sản phẩm</h3>
+          <button type="button" nz-button nzType="dashed" (click)="addOrderItem()">
+            <nz-icon nzType="plus" /> Thêm sản phẩm
+          </button>
+        </div>
+
+        <nz-table
+          #itemsTable
+          [nzData]="orderItems.controls"
+          nzSize="small"
+          [nzShowPagination]="false"
+        >
+          <thead>
+            <tr>
+              <th nzWidth="40%">Sản phẩm</th>
+              <th nzWidth="20%">Số lượng</th>
+              <th nzWidth="20%">Đơn giá</th>
+              <th nzWidth="10%">Thành tiền</th>
+              <th nzWidth="10%"></th>
+            </tr>
+          </thead>
+          <tbody formArrayName="orderItems">
+            @for (control of orderItems.controls; track $index) {
+              <tr [formGroupName]="$index">
+                <td>
+                  <nz-form-item class="mb-0">
+                    <nz-form-control nzErrorTip="Chọn sản phẩm">
+                      <nz-select
+                        formControlName="productId"
+                        nzPlaceHolder="Chọn sản phẩm"
+                        nzShowSearch
+                        [nzLoading]="productsLoading"
+                        (ngModelChange)="onProductChange($index, $event)"
+                      >
+                        @for (p of products; track p.id) {
+                          <nz-option
+                            [nzValue]="p.id"
+                            [nzLabel]="p.name + ' - SKU: ' + p.sku"
+                          ></nz-option>
+                        }
+                      </nz-select>
+                    </nz-form-control>
+                  </nz-form-item>
+                </td>
+                <td>
+                  <nz-form-item class="mb-0">
+                    <nz-form-control nzErrorTip="Nhập số lượng">
+                      <nz-input-number
+                        formControlName="quantity"
+                        [nzMin]="1"
+                        [nzStep]="1"
+                        style="width: 100%"
+                      ></nz-input-number>
+                    </nz-form-control>
+                  </nz-form-item>
+                </td>
+                <td>
+                  <nz-form-item class="mb-0">
+                    <nz-form-control nzErrorTip="Nhập đơn giá">
+                      <nz-input-number
+                        formControlName="price"
+                        [nzMin]="0"
+                        [nzStep]="1000"
+                        style="width: 100%"
+                      ></nz-input-number>
+                    </nz-form-control>
+                  </nz-form-item>
+                </td>
+                <td>
+                  {{ control.value.quantity * control.value.price | number }}
+                </td>
+                <td class="text-center">
+                  <button
+                    type="button"
+                    nz-button
+                    nzType="text"
+                    nzDanger
+                    (click)="removeOrderItem($index)"
+                    [disabled]="orderItems.length === 1"
+                  >
+                    <nz-icon nzType="delete" />
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="text-right font-bold">Tổng cộng:</td>
+              <td colspan="2" class="font-bold text-lg text-primary">
+                {{ totalAmount | number }}
+              </td>
+            </tr>
+          </tfoot>
+        </nz-table>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" nz-button (click)="goBack()">Hủy</button>
+        <button type="submit" nz-button nzType="primary" [nzLoading]="loading">Tạo đơn hàng</button>
+      </div>
+    </form>
+  </div>
+</app-dashboard-layout>

@@ -1,0 +1,65 @@
+@if (isLoading) {
+  <ngx-spinner [fullScreen]="true" type="ball-fussion" size="medium">
+    <p style="color: white">Waiting for data....</p>
+  </ngx-spinner>
+} @else {
+  <nz-layout [class.collapsed]="isCollapsed">
+    <nz-sider nzCollapsible [(nzCollapsed)]="isCollapsed">
+      <a routerLink="/dashboard" class="logo-box">
+        <img src="/logo.svg" alt="logo" class="logo" />
+      </a>
+
+      <ul nz-menu nzTheme="dark" nzMode="inline">
+        @for (menu of menus; track menu.title) {
+          @if (menu.children) {
+            <li nz-submenu [nzTitle]="menu.title" [nzIcon]="menu.icon" [(nzOpen)]="menu.open">
+              <ul>
+                @for (child of menu.children; track child.link) {
+                  <li
+                    nz-menu-item
+                    [routerLink]="child.link"
+                    [routerLinkActive]="'ant-menu-item-selected'"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                  >
+                    {{ child.title }}
+                  </li>
+                }
+              </ul>
+            </li>
+          } @else {
+            <li
+              nz-menu-item
+              [routerLink]="menu.link"
+              routerLinkActive="ant-menu-item-selected"
+              [routerLinkActiveOptions]="{ exact: true }"
+            >
+              <nz-icon [nzType]="menu.icon" />
+              <span>{{ menu.title }}</span>
+            </li>
+          }
+        }
+      </ul>
+    </nz-sider>
+
+    <nz-layout>
+      <nz-header>
+        <nz-icon
+          class="trigger"
+          [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"
+          (click)="isCollapsed = !isCollapsed"
+        />
+      </nz-header>
+      <nz-content>
+        <nz-breadcrumb>
+          @for (breadcrumb of listBreadcrumb; track breadcrumb) {
+            <nz-breadcrumb-item>{{ breadcrumb }}</nz-breadcrumb-item>
+          }
+        </nz-breadcrumb>
+        <div class="content">
+          <ng-content></ng-content>
+        </div>
+      </nz-content>
+      <nz-footer>Ant Design ©{{ date.getFullYear() }} Implement By Angular</nz-footer>
+    </nz-layout>
+  </nz-layout>
+}
