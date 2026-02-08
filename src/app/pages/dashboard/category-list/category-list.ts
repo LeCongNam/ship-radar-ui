@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   FormBuilder,
   FormGroup,
@@ -22,6 +22,8 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { HttpClient } from '@angular/common/http';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ROUTER_CONSTANTS } from '../../../../constants/api-router.constant';
 import { createUrl } from '../../../../shared';
 
@@ -53,6 +55,7 @@ interface Category {
     NzFormModule,
     NzInputModule,
     NzCheckboxModule,
+    RouterLink,
   ],
   templateUrl: './category-list.html',
   styleUrl: './category-list.scss',
@@ -69,6 +72,7 @@ export class CategoryListPage {
   pageSize = 10;
   total = 0;
   searchText = '';
+  private searchSubject = new Subject<string>();
 
   drawerVisible = false;
   drawerTitle = '';
@@ -77,6 +81,11 @@ export class CategoryListPage {
   editForm!: FormGroup;
 
   ngOnInit() {
+    this.searchSubject.pipe(debounceTime(500), distinctUntilChanged()).subscribe((value) => {
+      this.searchText = value;
+      this.pageIndex = 1;
+      this.loadData();
+    });
     this.initEditForm();
     this.loadData();
   }
@@ -96,27 +105,23 @@ export class CategoryListPage {
       this.http
         .get<{
           data: Category[];
-          meta: { page: number; pageSize: number; total: number };
+          metadata: { page: number; pageSize: number; total: number };
         }>(createUrl(ROUTER_CONSTANTS.DASHBOARD.CATEGORIES.LIST))
         .subscribe({
           next: (data) => {
             this.listOfData = data.data;
-            this.total = data.meta.total;
+            this.total = data.metadata.total;
             this.loading = false;
           },
           error: () => {
             this.loading = false;
           },
         });
-
-      this.total = 100;
-      this.loading = false;
     }, 500);
   }
 
   onSearch() {
-    this.pageIndex = 1;
-    this.loadData();
+    this.searchSubject.next(this.searchText);
   }
 
   onPageChange(page: number) {

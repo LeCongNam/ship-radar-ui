@@ -21,6 +21,7 @@ export const ApiInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
 
   const accessToken = localStorage.getItem(HEADER_CONSTANTS.ACCESS_TOKEN);
+
   const isPublicApi = req.url.includes('/api/auth/');
 
   let deviceId = localStorage.getItem(HEADER_CONSTANTS.DEVICE_ID);
@@ -28,8 +29,6 @@ export const ApiInterceptor: HttpInterceptorFn = (req, next) => {
     deviceId = Uuidv7();
     localStorage.setItem(HEADER_CONSTANTS.DEVICE_ID, deviceId);
   }
-
-  console.log('========');
 
   // 1. Đính kèm Token vào Request
   let authReq = req.clone({
@@ -42,10 +41,13 @@ export const ApiInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
+      console.error('Error intercepted:', error);
+
       // 2. Nếu lỗi 401 và không phải API Public
       if (error.status === 401 && !isPublicApi) {
         return handle401Error(authReq, next, authService, router);
       }
+
       return throwError(() => error);
     }),
   );
@@ -69,16 +71,17 @@ function handle401Error(
       switchMap((res: any) => {
         isRefreshing = false;
 
-        // Lưu token mới
-        localStorage.setItem(HEADER_CONSTANTS.ACCESS_TOKEN, res.accessToken);
-        localStorage.setItem(HEADER_CONSTANTS.REFRESH_TOKEN, res.refreshToken);
+        const { accessToken, refreshToken } = res.data;
 
-        refreshTokenSubject.next(res.accessToken);
+        // Lưu token mới
+        localStorage.setItem(HEADER_CONSTANTS.ACCESS_TOKEN, accessToken);
+        localStorage.setItem(HEADER_CONSTANTS.REFRESH_TOKEN, refreshToken);
+        refreshTokenSubject.next(accessToken);
 
         // Thực hiện lại request cũ với Token mới
         return next(
           req.clone({
-            setHeaders: { Authorization: `Bearer ${res.accessToken}` },
+            setHeaders: { Authorization: `Bearer ${accessToken}` },
           }),
         );
       }),

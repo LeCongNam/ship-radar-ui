@@ -1,0 +1,58 @@
+<app-dashboard-layout>
+  <div class="page-header">
+    <h2>Quản lý vận chuyển</h2>
+  </div>
+
+  <div class="button-add-box">
+    <div class="box-search">
+      <input
+        nz-input
+        placeholder="Tìm kiếm vận chuyển"
+        [(ngModel)]="searchText"
+        (ngModelChange)="onSearch()"
+      />
+      <div class="search-box">
+        <nz-icon nzType="search" nzTheme="outline" class="icon-search"></nz-icon>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <nz-table
+      #basicTable
+      [nzData]="listOfData"
+      [nzLoading]="loading"
+      [nzFrontPagination]="false"
+      [nzTotal]="total"
+      [nzPageIndex]="pageIndex"
+      [nzPageSize]="pageSize"
+      (nzPageIndexChange)="changePageIndex($event)"
+      nzBordered
+    >
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Mã vận đơn</th>
+          <th>Đơn hàng</th>
+          <th>Trạng thái</th>
+          <th>Loại</th>
+          <th>Ngày tạo</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (data of basicTable.data; track data.id) {
+          <tr>
+            <td>{{ data.id }}</td>
+            <td>{{ data.code }}</td>
+            <td>{{ data.orderId }}</td>
+            <td>
+              <nz-tag [nzColor]="'blue'">{{ data.status }}</nz-tag>
+            </td>
+            <td>{{ data.type }}</td>
+            <td>{{ data.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </div>
+</app-dashboard-layout>

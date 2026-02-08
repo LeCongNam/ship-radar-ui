@@ -22,6 +22,29 @@
     </button>
   </div>
 
+  <div class="filter">
+    <nz-select
+      [(ngModel)]="stockStatus"
+      (ngModelChange)="onFilterChange()"
+      style="width: 200px"
+      nzPlaceHolder="Trạng thái tồn kho"
+    >
+      <nz-option nzValue="all" nzLabel="Tất cả trạng thái kho"></nz-option>
+      <nz-option nzValue="in_stock" nzLabel="Còn hàng"></nz-option>
+      <nz-option nzValue="out_of_stock" nzLabel="Hết hàng"></nz-option>
+    </nz-select>
+
+    <nz-icon
+      nz-icon
+      nzType="sync"
+      [nzSpin]="isRefreshing"
+      (click)="loadData()"
+      class="icon-refresh"
+      nz-tooltip
+      nzTooltipTitle="Làm mới dữ liệu"
+    ></nz-icon>
+  </div>
+
   <div>
     <nz-table
       #basicTable
@@ -32,13 +55,16 @@
     >
       <thead>
         <tr>
-          <th>ID</th>
+          <th>#</th>
           <th>Tên sản phẩm</th>
+          <th>Mã định danh ngắn</th>
           <th>SKU</th>
           <th>Giá</th>
           <th>Tồn kho</th>
           <th>Danh mục</th>
           <th>Trạng thái</th>
+          <th>Ngày tạo</th>
+          <th>Ngày sửa gần nhất</th>
           <th>Hành động</th>
         </tr>
       </thead>
@@ -49,7 +75,12 @@
               {{ (pageIndex - 1) * pageSize + basicTable.data.indexOf(data) + 1 }}
             </td>
             <td>
-              <a [routerLink]="'/dashboard/products/edit/' + data.id">{{ data.name }}</a>
+              <a [routerLink]="'/dashboard/products/edit/' + data.id" class="prd-name">{{
+                data.name
+              }}</a>
+            </td>
+            <td>
+              <b class="prd-code">{{ data.productCode }}</b>
             </td>
             <td>{{ data.sku }}</td>
             <td>{{ data.price | number: '1.0-0' }} đ</td>
@@ -60,6 +91,14 @@
                 {{ data.isActive ? 'Hoạt động' : 'Tạm dừng' }}
               </nz-tag>
             </td>
+            <td>{{ data.createdAt | date: 'HH:mm:ss dd/MM/yyyy' }}</td>
+
+            @if (compareDates(data.updatedAt, data.createdAt) == true) {
+              <td>{{ data.updatedAt | date: 'HH:mm:ss dd/MM/yyyy' }}</td>
+            } @else {
+              <td>--</td>
+            }
+
             <td>
               <a (click)="showDetail(data)">Xem</a>
               <nz-divider nzType="vertical"></nz-divider>
@@ -93,96 +132,98 @@
   [nzTitle]="drawerTitle"
   (nzOnClose)="closeDrawer()"
 >
-  @if (selectedProduct) {
-    @if (isEditMode) {
-      <form nz-form [formGroup]="editForm" (ngSubmit)="saveQuickEdit()">
-        <nz-form-item>
-          <nz-form-label nzRequired>Tên sản phẩm</nz-form-label>
-          <nz-form-control>
-            <input nz-input formControlName="name" placeholder="Tên sản phẩm" />
-          </nz-form-control>
-        </nz-form-item>
+  <ng-container *nzDrawerContent>
+    @if (selectedProduct) {
+      @if (isEditMode) {
+        <form nz-form [formGroup]="editForm" (ngSubmit)="saveQuickEdit()">
+          <nz-form-item>
+            <nz-form-label nzRequired>Tên sản phẩm</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="name" placeholder="Tên sản phẩm" />
+            </nz-form-control>
+          </nz-form-item>
 
-        <nz-form-item>
-          <nz-form-label nzRequired>SKU</nz-form-label>
-          <nz-form-control>
-            <input nz-input formControlName="sku" placeholder="SKU" />
-          </nz-form-control>
-        </nz-form-item>
+          <nz-form-item>
+            <nz-form-label nzRequired>SKU</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="sku" placeholder="SKU" />
+            </nz-form-control>
+          </nz-form-item>
 
-        <nz-form-item>
-          <nz-form-label nzRequired>Giá</nz-form-label>
-          <nz-form-control>
-            <nz-input-number
-              formControlName="price"
-              [nzMin]="0"
-              [nzStep]="1000"
-              class="full-width"
-            ></nz-input-number>
-          </nz-form-control>
-        </nz-form-item>
+          <nz-form-item>
+            <nz-form-label nzRequired>Giá</nz-form-label>
+            <nz-form-control>
+              <nz-input-number
+                formControlName="price"
+                [nzMin]="0"
+                [nzStep]="1000"
+                class="full-width"
+              ></nz-input-number>
+            </nz-form-control>
+          </nz-form-item>
 
-        <nz-form-item>
-          <nz-form-label nzRequired>Tồn kho</nz-form-label>
-          <nz-form-control>
-            <nz-input-number
-              formControlName="stock"
-              [nzMin]="0"
-              class="full-width"
-            ></nz-input-number>
-          </nz-form-control>
-        </nz-form-item>
+          <nz-form-item>
+            <nz-form-label nzRequired>Tồn kho</nz-form-label>
+            <nz-form-control>
+              <nz-input-number
+                formControlName="stock"
+                [nzMin]="0"
+                class="full-width"
+              ></nz-input-number>
+            </nz-form-control>
+          </nz-form-item>
 
-        <nz-form-item>
-          <nz-form-label>Mô tả</nz-form-label>
-          <nz-form-control>
-            <textarea
-              nz-input
-              formControlName="description"
-              placeholder="Mô tả"
-              [nzAutosize]="{ minRows: 3, maxRows: 6 }"
-            ></textarea>
-          </nz-form-control>
-        </nz-form-item>
+          <nz-form-item>
+            <nz-form-label>Mô tả</nz-form-label>
+            <nz-form-control>
+              <textarea
+                nz-input
+                formControlName="description"
+                placeholder="Mô tả"
+                [nzAutosize]="{ minRows: 3, maxRows: 6 }"
+              ></textarea>
+            </nz-form-control>
+          </nz-form-item>
 
-        <nz-form-item>
-          <nz-form-label>Trạng thái</nz-form-label>
-          <nz-form-control>
-            <label nz-checkbox formControlName="isActive">Hoạt động</label>
-          </nz-form-control>
-        </nz-form-item>
+          <nz-form-item>
+            <nz-form-label>Trạng thái</nz-form-label>
+            <nz-form-control>
+              <label nz-checkbox formControlName="isActive">Hoạt động</label>
+            </nz-form-control>
+          </nz-form-item>
 
-        <div class="drawer-footer">
-          <button type="button" nz-button (click)="closeDrawer()">Hủy</button>
-          <button type="submit" nz-button nzType="primary" [nzLoading]="loading">Lưu</button>
-        </div>
-      </form>
-    } @else {
-      <nz-descriptions nzBordered [nzColumn]="1">
-        <nz-descriptions-item nzTitle="ID">{{ selectedProduct.id }}</nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Tên sản phẩm">{{
-          selectedProduct.name
-        }}</nz-descriptions-item>
-        <nz-descriptions-item nzTitle="SKU">{{ selectedProduct.sku }}</nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Giá"
-          >{{ selectedProduct.price | number: '1.0-0' }} đ</nz-descriptions-item
-        >
-        <nz-descriptions-item nzTitle="Tồn kho">{{ selectedProduct.stock }}</nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Danh mục">{{
-          selectedProduct.category?.name
-        }}</nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Mô tả">{{
-          selectedProduct.description
-        }}</nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Trạng thái">
-          <nz-tag [nzColor]="selectedProduct.isActive ? 'green' : 'red'">
-            {{ selectedProduct.isActive ? 'Hoạt động' : 'Tạm dừng' }}
-          </nz-tag>
-        </nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Ngày tạo">
-          {{ selectedProduct.createdAt | date: 'dd/MM/yyyy HH:mm' }}
-        </nz-descriptions-item>
-      </nz-descriptions>
+          <div class="drawer-footer">
+            <button type="button" nz-button (click)="closeDrawer()">Hủy</button>
+            <button type="submit" nz-button nzType="primary" [nzLoading]="loading">Lưu</button>
+          </div>
+        </form>
+      } @else {
+        <nz-descriptions nzBordered [nzColumn]="1">
+          <nz-descriptions-item nzTitle="ID">{{ selectedProduct.id }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Tên sản phẩm">{{
+            selectedProduct.name
+          }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="SKU">{{ selectedProduct.sku }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Giá"
+            >{{ selectedProduct.price | number: '1.0-0' }} đ</nz-descriptions-item
+          >
+          <nz-descriptions-item nzTitle="Tồn kho">{{ selectedProduct.stock }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Danh mục">{{
+            selectedProduct.category?.name
+          }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Mô tả">{{
+            selectedProduct.description
+          }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Trạng thái">
+            <nz-tag [nzColor]="selectedProduct.isActive ? 'green' : 'red'">
+              {{ selectedProduct.isActive ? 'Hoạt động' : 'Tạm dừng' }}
+            </nz-tag>
+          </nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Ngày tạo">
+            {{ selectedProduct.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+          </nz-descriptions-item>
+        </nz-descriptions>
+      }
     }
-  }
+  </ng-container>
 </nz-drawer>

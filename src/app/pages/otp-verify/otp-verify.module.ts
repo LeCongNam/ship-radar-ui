@@ -24,7 +24,7 @@ export class OtpVerify implements OnInit, OnDestroy {
   private fb = inject(NonNullableFormBuilder);
   private httpClient = inject(HttpClient);
   private router = inject(Router);
- private messageClient = inject(NzMessageService);
+  private messageClient = inject(NzMessageService);
 
   email: string = '';
   otpControl = new FormControl('', [Validators.required, Validators.minLength(6)]);
@@ -58,9 +58,7 @@ export class OtpVerify implements OnInit, OnDestroy {
     this.httpClient
       .post('http://localhost:3001/api/auth/send-otp', { email: this.email })
       .subscribe({
-        next: (response) => {
-          console.log('OTP sent:', response);
-        },
+        next: (response) => {},
         error: (error) => {
           console.error('Error sending OTP:', error);
         },
@@ -76,10 +74,10 @@ export class OtpVerify implements OnInit, OnDestroy {
       .pipe(
         takeWhile(() => this.timer > 0),
         finalize(() => {
-          console.log('Time is up!');
+          ('Time is up!');
           this.bntResendOtpDisabled = false;
           this.timer = 0;
-        })
+        }),
       )
       .subscribe(() => {
         this.timer -= 1;
@@ -99,12 +97,11 @@ export class OtpVerify implements OnInit, OnDestroy {
   /** Gửi OTP verify đến server */
   verifyOtp() {
     if (!this.otpControl.valid) {
-      console.log('OTP chưa đủ 6 số');
+      ('OTP chưa đủ 6 số');
       return;
     }
 
     const otp = this.otpControl.value;
-    console.log('Verify OTP:', otp);
 
     this.httpClient
       .post('http://localhost:3001/api/auth/verify-otp', {
@@ -113,15 +110,14 @@ export class OtpVerify implements OnInit, OnDestroy {
       })
       .subscribe({
         next: (response: any) => {
-          console.log('OTP verified successfully:', response);
           this.messageClient.success('Xác thực OTP thành công!');
 
-          localStorage.setItem(HEADER_CONSTANTS.ACCESS_TOKEN, response?.token?.accessToken);
-          localStorage.setItem(HEADER_CONSTANTS.REFRESH_TOKEN,response?.token?.refreshToken)
+          localStorage.setItem(HEADER_CONSTANTS.ACCESS_TOKEN, response?.data?.token?.accessToken);
+          localStorage.setItem(HEADER_CONSTANTS.REFRESH_TOKEN, response?.data?.token?.refreshToken);
 
-            setTimeout(() => {
-              this.router.navigate(['/dashboard']);
-            }, 3000);
+          setTimeout(() => {
+            this.router.navigate(['/dashboard']);
+          }, 3000);
         },
         error: (error) => {
           console.error('OTP verification failed:', error);

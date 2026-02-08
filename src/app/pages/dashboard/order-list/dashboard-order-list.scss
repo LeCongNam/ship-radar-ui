@@ -51,3 +51,37 @@
 
 
 }
+
+
+.order-barcode {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+
+.icon-copy {
+  font-size: 16px;
+  color: #1890ff;
+  cursor: pointer;
+}
+
+
+.action {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+
+  .icon-refresh {
+    font-size: 24px;
+    cursor: pointer;
+    color: #1890ff;
+  }
+}

@@ -16,23 +16,52 @@
         </nz-form-item>
 
         <nz-form-item>
-          <nz-form-label nzRequired>SKU</nz-form-label>
+          <nz-form-label nzRequired>
+            <div class="sku-title">
+              <span>SKU (Gợi ý dựa trên tên + 4 mã cuối)</span>
+              <span
+                nz-icon
+                nzType="question-circle"
+                nzTheme="outline"
+                class="question-ico"
+                nz-tooltip
+                nzTooltipTitle="Hệ thống tự sinh 4 ký tự cuối để tối ưu tìm kiếm hoặc bạn tự nhập mã riêng nhưng phải đảm bảo duy nhất"
+              ></span>
+            </div>
+          </nz-form-label>
+
           <nz-form-control nzErrorTip="Vui lòng nhập SKU">
-            <input nz-input formControlName="sku" placeholder="SKU-00001" />
+            <nz-form-control nzErrorTip="Vui lòng nhập SKU">
+              <input nz-input formControlName="sku" placeholder="SKU-00001" />
+            </nz-form-control>
+
+            <ng-template #suffixTemplate>
+              <span
+                nz-icon
+                nzType="reload"
+                (click)="generateAutoSku(productForm.get('name')?.value)"
+                style="cursor: pointer; color: #1890ff"
+                nz-tooltip
+                nzTooltipTitle="Sinh mã ngẫu nhiên mới"
+              ></span>
+            </ng-template>
           </nz-form-control>
         </nz-form-item>
 
         <div nz-row [nzGutter]="16">
           <div nz-col [nzSpan]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>Giá</nz-form-label>
+              <nz-form-label nzRequired>Giá (VND)</nz-form-label>
               <nz-form-control nzErrorTip="Vui lòng nhập giá">
                 <nz-input-number
                   formControlName="price"
                   [nzMin]="0"
                   [nzStep]="1000"
+                  [nzFormatter]="formatterCurrency"
+                  [nzParser]="parserCurrency"
                   class="full-width"
                 ></nz-input-number>
+                <span> </span>
               </nz-form-control>
             </nz-form-item>
           </div>

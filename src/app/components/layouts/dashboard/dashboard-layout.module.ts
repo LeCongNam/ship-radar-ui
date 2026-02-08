@@ -13,6 +13,8 @@ import { NzMenuDirective, NzMenuItemComponent, NzSubMenuComponent } from 'ng-zor
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
+import { NzAvatarModule } from 'ng-zorro-antd/avatar';
+import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 
 // Định nghĩa cấu trúc Menu để dễ dàng quản lý và thêm mới
 interface MenuItem {
@@ -44,6 +46,8 @@ interface MenuItem {
     RouterLink,
     RouterLinkActive,
     NgxSpinnerModule,
+    NzAvatarModule,
+    NzDropDownModule,
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard-layout.scss',
@@ -96,8 +100,10 @@ export class DashboardLayout implements OnInit {
     {
       title: 'Quản lý cửa hàng',
       icon: 'shop',
-      link: '/dashboard/shops',
-      key: 'shops',
+      children: [
+        { title: 'Danh sách cửa hàng', link: '/dashboard/shops', key: 'shops' },
+        { title: 'Thêm cửa hàng', link: '/dashboard/shops/create', key: 'shops-create' },
+      ],
     },
     {
       title: 'Đơn hàng',
@@ -107,6 +113,7 @@ export class DashboardLayout implements OnInit {
         { title: 'Tạo đơn hàng', link: '/dashboard/orders/create', key: 'orders-create' },
       ],
     },
+
     {
       title: 'Vận chuyển',
       icon: 'car',
@@ -117,6 +124,25 @@ export class DashboardLayout implements OnInit {
       ],
     },
   ];
+
+  user:
+    | {
+        id: number;
+        email: string;
+        firstName: any;
+        lastName: any;
+        username: string;
+        bio: any;
+        avatar: any;
+        dob: any;
+        phoneNumber: any;
+        isVerifyEmail: boolean;
+        isVerifyPhone: boolean;
+        isActive: boolean;
+        createdAt: string;
+        updatedAt: string;
+      }
+    | undefined;
 
   ngOnInit(): void {
     // 1. Khởi tạo trạng thái dựa trên URL hiện tại khi load trang lần đầu
@@ -130,6 +156,15 @@ export class DashboardLayout implements OnInit {
       });
 
     this.runLoading();
+
+    this.loadUser();
+  }
+
+  private loadUser(): void {
+    const userData = localStorage.getItem('user_local');
+    if (userData) {
+      this.user = JSON.parse(userData);
+    }
   }
 
   private handleNavigation(url: string): void {
@@ -161,7 +196,7 @@ export class DashboardLayout implements OnInit {
     setTimeout(() => {
       this.spinner.hide();
       this.isLoading = false;
-    }, 1500); // Mock delay cho data
+    }, 1000); // Mock delay cho data
   }
 
   startResizing(event: MouseEvent) {

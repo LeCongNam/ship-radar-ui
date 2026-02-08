@@ -7,7 +7,7 @@ export const ROUTER_CONSTANTS = {
   DASHBOARD: {
     HOME: 'dashboard',
     ORDERS: {
-      LIST: 'dashboard/orders/list',
+      LIST: 'dashboard/orders',
       CREATE: 'dashboard/orders',
     },
     USERS: {
@@ -43,6 +43,6 @@ export const ROUTER_CONSTANTS = {
       CREATE: 'dashboard/shops',
       EDIT: 'dashboard/shops',
       DETAIL: 'dashboard/shops',
-    }
+    },
   },
 };

@@ -58,11 +58,42 @@
 
     <nz-layout>
       <nz-header>
-        <nz-icon
-          class="trigger"
-          [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"
-          (click)="isCollapsed = !isCollapsed"
-        />
+        <div class="header">
+          <nz-icon
+            class="trigger"
+            [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"
+            (click)="isCollapsed = !isCollapsed"
+          />
+
+          <div>
+            @if (user?.avatar) {
+              <nz-avatar
+                nzIcon="user"
+                nzSrc="//zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
+                nz-dropdown
+                [nzDropdownMenu]="menu"
+              />
+            } @else {
+              <nz-avatar
+                nzText="U"
+                style="color: #f56a00; background-color: #fde3cf"
+                nz-dropdown
+                [nzDropdownMenu]="menu"
+              />
+            }
+
+            <nz-dropdown-menu #menu="nzDropdownMenu">
+              <ul nz-menu nzSelectable>
+                <li nz-menu-item>
+                  <nz-icon nzType="user" class="mr-2"></nz-icon>
+                  {{ user?.username }}
+                </li>
+                <li nz-menu-divider></li>
+                <li nz-menu-item nzDanger>Đăng xuất</li>
+              </ul>
+            </nz-dropdown-menu>
+          </div>
+        </div>
       </nz-header>
       <nz-content>
         <nz-breadcrumb>

@@ -1,0 +1,167 @@
+<app-dashboard-layout>
+  <div class="page-header">
+    <h2>{{ pageTitle }}</h2>
+  </div>
+
+  <div class="form-container">
+    <form nz-form [formGroup]="orderForm" (ngSubmit)="onSubmit()" nzLayout="vertical">
+      <!-- SHOP + STATUS -->
+      <div class="form-section">
+        <h3>Thông tin chung</h3>
+
+        <div class="grid grid-cols-2 gap-4">
+          <nz-form-item>
+            <nz-form-label nzRequired>Cửa hàng</nz-form-label>
+            <nz-form-control nzErrorTip="Vui lòng chọn cửa hàng">
+              <nz-select
+                *ngIf="!shopsLoading"
+                formControlName="shopId"
+                nzPlaceHolder="Chọn cửa hàng"
+                [nzLoading]="shopsLoading"
+              >
+                <nz-option
+                  *ngFor="let shop of shops; trackBy: trackByShop"
+                  [nzValue]="shop.id"
+                  [nzLabel]="shop.name + ' : ' + shop.address"
+                ></nz-option>
+              </nz-select>
+
+              <div *ngIf="shopsLoading" class="text-gray-500">Đang tải cửa hàng...</div>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label nzRequired>Trạng thái</nz-form-label>
+            <nz-form-control nzErrorTip="Vui lòng chọn trạng thái">
+              <nz-select formControlName="status" nzPlaceHolder="Chọn trạng thái">
+                @for (status of orderStatusOptions; track $index) {
+                  <nz-option [nzValue]="status.value" [nzLabel]="status.label"></nz-option>
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <!-- RECEIVER INFO -->
+      <div class="form-section">
+        <h3>Thông tin người nhận</h3>
+
+        <div class="grid grid-cols-2 gap-4">
+          <nz-form-item>
+            <nz-form-label nzRequired>Tên người nhận</nz-form-label>
+            <nz-form-control nzErrorTip="Vui lòng nhập tên người nhận">
+              <input nz-input formControlName="receiverName" placeholder="Tên người nhận" />
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label nzRequired>Số điện thoại</nz-form-label>
+            <nz-form-control nzErrorTip="Vui lòng nhập số điện thoại hợp lệ">
+              <input nz-input formControlName="receiverPhone" placeholder="Số điện thoại" />
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item class="col-span-2">
+            <nz-form-label nzRequired>Địa chỉ người nhận</nz-form-label>
+            <nz-form-control nzErrorTip="Vui lòng nhập địa chỉ nhận hàng">
+              <input nz-input formControlName="receiverAddress" placeholder="Địa chỉ chi tiết" />
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item class="col-span-2">
+            <nz-form-label>Ghi chú</nz-form-label>
+            <nz-form-control>
+              <textarea
+                nz-input
+                formControlName="noted"
+                placeholder="Ghi chú đơn hàng"
+                [nzAutosize]="{ minRows: 2, maxRows: 6 }"
+              ></textarea>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <!-- ORDER ITEMS -->
+      <div class="form-section">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="m-0">Sản phẩm trong đơn hàng</h3>
+          <button type="button" nz-button nzType="primary" (click)="addOrderItem()">
+            <nz-icon nzType="plus" /> Thêm sản phẩm
+          </button>
+        </div>
+
+        <!-- Danh sách sản phẩm -->
+        <nz-table [nzData]="orderItems.controls" [nzFrontPagination]="false" nzSize="middle">
+          <thead>
+            <tr>
+              <th>Sản phẩm</th>
+              <th>Số lượng</th>
+              <th>Đơn giá</th>
+              <th>Thành tiền</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody formArrayName="orderItems">
+            @for (control of orderItems.controls; let i = $index; track control) {
+              <tr [formGroupName]="i">
+                <td>
+                  <nz-select
+                    formControlName="productId"
+                    nzShowSearch
+                    nzPlaceHolder="Chọn sản phẩm"
+                    [nzLoading]="productsLoading"
+                    (ngModelChange)="onProductChange(i, $event)"
+                  >
+                    @for (p of products; track trackByProduct(i, p); let i = $index) {
+                      <nz-option [nzValue]="p.id" [nzLabel]="p.name"></nz-option>
+                    }
+                  </nz-select>
+                </td>
+                <td>
+                  <nz-input-number
+                    formControlName="quantity"
+                    [nzMin]="1"
+                    [nzStep]="1"
+                  ></nz-input-number>
+                </td>
+                <td>{{ control.value.price | number }}đ</td>
+                <td class="col-total-item">
+                  {{ control.value.quantity * control.value.price | number }}đ
+                </td>
+                <td>
+                  <button
+                    nz-button
+                    nzType="text"
+                    nzDanger
+                    (click)="removeOrderItem(i)"
+                    [disabled]="orderItems.length === 1"
+                  >
+                    <nz-icon nzType="delete"></nz-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+
+          <tfoot>
+            <tr>
+              <td colspan="5">
+                <div class="summary-row">
+                  <span class="label">Tổng cộng:</span>
+                  <span class="value">{{ totalAmount | number }}đ</span>
+                </div>
+              </td>
+            </tr>
+          </tfoot>
+        </nz-table>
+      </div>
+
+      <div class="form-actions mt-4">
+        <button type="button" nz-button (click)="goBack()">Hủy</button>
+        <button type="submit" nz-button nzType="primary" [nzLoading]="loading">Tạo đơn hàng</button>
+      </div>
+    </form>
+  </div>
+</app-dashboard-layout>

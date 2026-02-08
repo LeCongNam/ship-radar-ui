@@ -45,9 +45,13 @@
         @for (data of basicTable.data; track data.id) {
           <tr>
             <td>
-              <a (click)="navigateToEdit(data.id)">{{ data.id }}</a>
+              {{ pageSize * (pageIndex - 1) + basicTable.data.indexOf(data) + 1 }}
             </td>
-            <td>{{ data.name }}</td>
+            <td>
+              <a [routerLink]="['/dashboard/categories/edit', data.id]">
+                {{ data.name }}
+              </a>
+            </td>
             <td>{{ data.description }}</td>
             <td>{{ data.productCount || 0 }}</td>
             <td>
@@ -81,69 +85,71 @@
     >
     </nz-pagination>
   </div>
+
+  <nz-drawer
+    [nzVisible]="drawerVisible"
+    [nzWidth]="720"
+    [nzTitle]="drawerTitle"
+    (nzOnClose)="closeDrawer()"
+  >
+    <ng-container *nzDrawerContent>
+      @if (selectedCategory) {
+        @if (isEditMode) {
+          <form nz-form [formGroup]="editForm" (ngSubmit)="saveQuickEdit()">
+            <nz-form-item>
+              <nz-form-label nzRequired>Tên danh mục</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="name" placeholder="Tên danh mục" />
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item>
+              <nz-form-label>Mô tả</nz-form-label>
+              <nz-form-control>
+                <textarea
+                  nz-input
+                  formControlName="description"
+                  placeholder="Mô tả"
+                  [nzAutosize]="{ minRows: 3, maxRows: 6 }"
+                ></textarea>
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item>
+              <nz-form-label>Trạng thái</nz-form-label>
+              <nz-form-control>
+                <label nz-checkbox formControlName="isActive">Hoạt động</label>
+              </nz-form-control>
+            </nz-form-item>
+
+            <div class="drawer-footer">
+              <button type="button" nz-button (click)="closeDrawer()">Hủy</button>
+              <button type="submit" nz-button nzType="primary" [nzLoading]="loading">Lưu</button>
+            </div>
+          </form>
+        } @else {
+          <nz-descriptions nzBordered [nzColumn]="1">
+            <nz-descriptions-item nzTitle="ID">{{ selectedCategory.id }}</nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Tên danh mục">{{
+              selectedCategory.name
+            }}</nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Mô tả">{{
+              selectedCategory.description
+            }}</nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Số sản phẩm">{{
+              selectedCategory.productCount || 0
+            }}</nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Trạng thái">
+              <nz-tag [nzColor]="selectedCategory.isActive ? 'green' : 'red'">
+                {{ selectedCategory.isActive ? 'Hoạt động' : 'Tạm dừng' }}
+              </nz-tag>
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Ngày tạo">
+              {{ selectedCategory.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+            </nz-descriptions-item>
+          </nz-descriptions>
+        }
+      }
+    </ng-container>
+  </nz-drawer>
 </app-dashboard-layout>
-
-<nz-drawer
-  [nzVisible]="drawerVisible"
-  [nzWidth]="720"
-  [nzTitle]="drawerTitle"
-  (nzOnClose)="closeDrawer()"
->
-  @if (selectedCategory) {
-    @if (isEditMode) {
-      <form nz-form [formGroup]="editForm" (ngSubmit)="saveQuickEdit()">
-        <nz-form-item>
-          <nz-form-label nzRequired>Tên danh mục</nz-form-label>
-          <nz-form-control>
-            <input nz-input formControlName="name" placeholder="Tên danh mục" />
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-label>Mô tả</nz-form-label>
-          <nz-form-control>
-            <textarea
-              nz-input
-              formControlName="description"
-              placeholder="Mô tả"
-              [nzAutosize]="{ minRows: 3, maxRows: 6 }"
-            ></textarea>
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-label>Trạng thái</nz-form-label>
-          <nz-form-control>
-            <label nz-checkbox formControlName="isActive">Hoạt động</label>
-          </nz-form-control>
-        </nz-form-item>
-
-        <div class="drawer-footer">
-          <button type="button" nz-button (click)="closeDrawer()">Hủy</button>
-          <button type="submit" nz-button nzType="primary" [nzLoading]="loading">Lưu</button>
-        </div>
-      </form>
-    } @else {
-      <nz-descriptions nzBordered [nzColumn]="1">
-        <nz-descriptions-item nzTitle="ID">{{ selectedCategory.id }}</nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Tên danh mục">{{
-          selectedCategory.name
-        }}</nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Mô tả">{{
-          selectedCategory.description
-        }}</nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Số sản phẩm">{{
-          selectedCategory.productCount || 0
-        }}</nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Trạng thái">
-          <nz-tag [nzColor]="selectedCategory.isActive ? 'green' : 'red'">
-            {{ selectedCategory.isActive ? 'Hoạt động' : 'Tạm dừng' }}
-          </nz-tag>
-        </nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Ngày tạo">
-          {{ selectedCategory.createdAt | date: 'dd/MM/yyyy HH:mm' }}
-        </nz-descriptions-item>
-      </nz-descriptions>
-    }
-  }
-</nz-drawer>

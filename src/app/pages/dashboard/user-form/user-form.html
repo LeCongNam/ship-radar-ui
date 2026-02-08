@@ -99,6 +99,23 @@
         </nz-form-item>
       </div>
 
+      <div class="form-section">
+        <nz-form-item>
+          <nz-form-control>
+            <nz-upload
+              nzAction="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
+              [nzHeaders]="{ authorization: 'authorization-text' }"
+              (nzChange)="handleChange($event)"
+            >
+              <button nz-button>
+                <nz-icon nzType="upload" />
+                Click to Upload
+              </button>
+            </nz-upload>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
       <div class="form-actions">
         <button type="button" nz-button (click)="goBack()">Hủy</button>
         <button type="submit" nz-button nzType="primary" [nzLoading]="loading">

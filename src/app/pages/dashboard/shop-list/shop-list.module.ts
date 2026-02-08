@@ -1,8 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  FormsModule,
-} from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { DashboardLayout } from '../../../components/layouts/dashboard/dashboard-layout.module';
 import { NzTableModule } from 'ng-zorro-antd/table';
@@ -15,6 +13,8 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { HttpClient } from '@angular/common/http';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ROUTER_CONSTANTS } from '../../../../constants/api-router.constant';
 import { createUrl } from '../../../../shared';
 import { Shop } from '../../../models/shop.model';
@@ -49,8 +49,14 @@ export class ShopListPage {
   pageSize = 10;
   total = 0;
   searchText = '';
+  private searchSubject = new Subject<string>();
 
   ngOnInit() {
+    this.searchSubject.pipe(debounceTime(500), distinctUntilChanged()).subscribe((value) => {
+      this.searchText = value;
+      this.pageIndex = 1;
+      this.loadData();
+    });
     this.loadData();
   }
 
@@ -60,7 +66,7 @@ export class ShopListPage {
     // Simulate API call structure matching other lists
     const params: any = {
       page: this.pageIndex,
-      limit: this.pageSize,
+      pageSize: this.pageSize,
     };
 
     if (this.searchText) {
@@ -85,11 +91,11 @@ export class ShopListPage {
             this.total = response.meta.total;
             this.pageIndex = response.meta.page;
           }
-           // Fallback if meta is not provided properly or structure differs
-           if(!response.meta && Array.isArray(response)){
-               this.listOfData = response as any;
-               this.total = this.listOfData.length;
-           }
+          // Fallback if meta is not provided properly or structure differs
+          if (!response.meta && Array.isArray(response)) {
+            this.listOfData = response as any;
+            this.total = this.listOfData.length;
+          }
 
           this.loading = false;
         },
@@ -102,8 +108,7 @@ export class ShopListPage {
   }
 
   onSearch() {
-    this.pageIndex = 1;
-    this.loadData();
+    this.searchSubject.next(this.searchText);
   }
 
   onPageChange(pageIndex: number) {
@@ -128,7 +133,7 @@ export class ShopListPage {
   delete(id: string) {
     this.http
       .delete(
-        createUrl(ROUTER_CONSTANTS.DASHBOARD.SHOPS.EDIT + '/' + id)
+        createUrl(ROUTER_CONSTANTS.DASHBOARD.SHOPS.EDIT + '/' + id),
         // Note: Assuming DELETE uses same base path plus ID.
         // In category implementation: createUrl(ROUTER_CONSTANTS.DASHBOARD.CATEGORIES.EDIT, { params: this.categoryId })
         // But createUrl helper usage might differ. Let's stick to manual concatenation or check createUrl utility.

@@ -22,10 +22,13 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { HttpClient } from '@angular/common/http';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ROUTER_CONSTANTS } from '../../../../constants/api-router.constant';
 import { createUrl } from '../../../../shared';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzModalService } from 'ng-zorro-antd/modal';
+import { NzUploadChangeParam, NzUploadModule } from 'ng-zorro-antd/upload';
 
 interface User {
   id: number;
@@ -64,6 +67,8 @@ interface User {
     NzCheckboxModule,
     RouterLink,
     NzSwitchModule,
+    NzIconModule,
+    NzUploadModule,
   ],
   templateUrl: './user-list.html',
   styleUrl: './user-list.scss',
@@ -81,6 +86,7 @@ export class UserListPage {
   pageSize = 10;
   total = 0;
   searchText = '';
+  private searchSubject = new Subject<string>();
 
   drawerVisible = false;
   drawerTitle = '';
@@ -90,6 +96,11 @@ export class UserListPage {
   private modal = inject(NzModalService); // Inject service
 
   ngOnInit() {
+    this.searchSubject.pipe(debounceTime(500), distinctUntilChanged()).subscribe((value) => {
+      this.searchText = value;
+      this.pageIndex = 1;
+      this.loadData();
+    });
     this.initEditForm();
     this.loadData();
   }
@@ -125,7 +136,7 @@ export class UserListPage {
           this.loading = false;
         },
         error: (err) => {
-          console.log(err);
+          err;
 
           this.loading = false;
           this.message.error('Không thể tải dữ liệu');
@@ -134,32 +145,12 @@ export class UserListPage {
 
     // Mock data
     setTimeout(() => {
-      // const mockData: User[] = [];
-      // for (let i = 1; i <= 10; i++) {
-      //   mockData.push({
-      //     id: i,
-      //     email: `user${i}@example.com`,
-      //     firstName: `Nguyễn`,
-      //     lastName: `Văn ${String.fromCharCode(64 + i)}`,
-      //     username: `user${i}`,
-      //     bio: `Bio của người dùng ${i}`,
-      //     phoneNumber: `090000000${i}`,
-      //     isVerifyEmail: i % 2 === 0,
-      //     isVerifyPhone: i % 3 === 0,
-      //     isActive: i % 4 !== 0,
-      //     createdAt: new Date().toISOString(),
-      //     updatedAt: new Date().toISOString(),
-      //   });
-      // }
-      // this.listOfData = mockData;
-      this.total = 100;
       this.loading = false;
     }, 500);
   }
 
   onSearch() {
-    this.pageIndex = 1;
-    this.loadData();
+    this.searchSubject.next(this.searchText);
   }
 
   onPageChange(page: number) {

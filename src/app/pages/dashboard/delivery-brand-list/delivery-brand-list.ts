@@ -12,6 +12,8 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { HttpClient } from '@angular/common/http';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { ROUTER_CONSTANTS } from '../../../../constants/api-router.constant';
 import { createUrl } from '../../../../shared';
@@ -46,8 +48,16 @@ export class DeliveryBrandList implements OnInit {
   pageSize = 10;
   total = 0;
   searchText = '';
+  private searchSubject = new Subject<string>();
 
   ngOnInit() {
+    this.searchSubject
+      .pipe(debounceTime(500), distinctUntilChanged())
+      .subscribe((value) => {
+        this.searchText = value;
+        this.pageIndex = 1;
+        this.loadData();
+      });
     this.loadData();
   }
 
@@ -86,8 +96,7 @@ export class DeliveryBrandList implements OnInit {
   }
 
   onSearch() {
-    this.pageIndex = 1;
-    this.loadData();
+    this.searchSubject.next(this.searchText);
   }
 
   navigateToCreate() {

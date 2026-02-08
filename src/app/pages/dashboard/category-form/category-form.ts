@@ -62,7 +62,6 @@ export class CategoryFormPage implements OnInit {
 
   loadCategoryData(id: string) {
     this.loading = true;
-    let valueForm;
     this.http
       .get(
         createUrl(ROUTER_CONSTANTS.DASHBOARD.CATEGORIES.EDIT, {
@@ -71,8 +70,6 @@ export class CategoryFormPage implements OnInit {
       )
       .subscribe({
         next: (response: any) => {
-          console.log('res', response);
-
           this.categoryForm.patchValue(response.data);
           this.loading = false;
         },
