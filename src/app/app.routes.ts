@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import {
   DashboardHomePage,
-  DashboardOrderCreate,
+  DashboardOrderFormPage,
   DashboardOrderListPage,
   LoginPage,
   OtpVerify,
@@ -15,6 +15,7 @@ import {
   DeliveryBrandFormPage,
   ShopListPage,
   ShopFormPage,
+  ShippingListPage,
 } from './pages';
 import { authGuard } from '../guards/auth.guard';
 import { Home } from './pages/home/home';
@@ -43,7 +44,11 @@ export const routes: Routes = [
       },
       {
         path: 'orders/create',
-        component: DashboardOrderCreate,
+        component: DashboardOrderFormPage,
+      },
+      {
+        path: 'orders/:id',
+        component: DashboardOrderFormPage,
       },
       // Users
       {
@@ -115,6 +120,18 @@ export const routes: Routes = [
       {
         path: 'delivery-brands/edit/:id',
         component: DeliveryBrandFormPage,
+      },
+      {
+        path: 'shipping',
+        component: ShippingListPage,
+      },
+      {
+        path: 'shops',
+        component: ShopListPage,
+      },
+      {
+        path: 'shops/create',
+        component: ShopFormPage,
       },
       // Shipping (placeholder - component chưa tạo)
       {

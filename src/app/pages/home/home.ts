@@ -71,13 +71,12 @@ export class Home {
   }
 
   performSearch(searchTerm: string) {
-    console.log('Searching for:', searchTerm);
     this.isLoading.set(true);
-    console.log('Loading set to true');
+    ('Loading set to true');
 
     // Mock search with setTimeout
     setTimeout(() => {
-      console.log('Search completed');
+      ('Search completed');
       if (!searchTerm.trim()) {
         this.ships.set(this.allShips);
       } else {
@@ -89,13 +88,13 @@ export class Home {
         );
         this.ships.set(filtered);
       }
-      console.log('Loading set to false');
+      ('Loading set to false');
       this.isLoading.set(false);
     }, 800);
   }
 
   loadShips() {
-    console.log('Initial loading started');
+    ('Initial loading started');
     // Simulate initial loading
     setTimeout(() => {
       this.allShips = [
@@ -149,16 +148,14 @@ export class Home {
         },
       ];
       this.ships.set(this.allShips);
-      console.log('Initial loading completed, ships loaded:', this.allShips.length);
       this.isLoading.set(false);
-      console.log('Loading set to false');
+      ('Loading set to false');
     }, 2000);
   }
 
   onCheck() {
     const value = this.inputValue();
     if (value.trim()) {
-      console.log('Checked value:', value);
       alert(`Giá trị đã nhập: ${value}`);
     } else {
       alert('Vui lòng nhập giá trị!');

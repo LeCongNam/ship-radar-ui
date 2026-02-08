@@ -1,0 +1,189 @@
+.page-header {
+  margin-bottom: 24px;
+
+  h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+.form-container {
+  max-width: 1000px;
+  background: #fff;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-section {
+  margin-bottom: 32px;
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f0f0f0;
+
+    h3 {
+      margin-bottom: 0;
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+  }
+}
+
+.grid {
+  display: grid;
+
+  &.grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+.col-span-2 {
+  grid-column: span 2;
+
+  @media (max-width: 768px) {
+    grid-column: span 1;
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.mb-0 {
+  margin-bottom: 0;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.font-bold {
+  font-weight: 600;
+}
+
+.text-lg {
+  font-size: 18px;
+}
+
+.text-primary {
+  color: #1890ff;
+}
+
+
+/* --- Tinh chỉnh phần bảng sản phẩm --- */
+.form-section {
+  .nz-table-wrapper {
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  /* Làm tiêu đề bảng chuyên nghiệp hơn */
+  nz-table thead>tr>th {
+    background: #fafafa;
+    font-weight: 600;
+    color: #555;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  /* Style cho các ô input trong bảng */
+  nz-select,
+  nz-input-number {
+    width: 100% !important;
+    border-radius: 4px;
+  }
+
+  /* Hiệu ứng hover cho hàng */
+  tbody tr:hover {
+    background-color: #f9f9f9;
+  }
+
+  /* Cột số lượng và giá cần gọn gàng */
+  td {
+    padding: 12px 8px !important;
+    vertical-align: middle;
+  }
+
+  /* Ô hiển thị Thành tiền */
+  .col-total-item {
+    font-weight: 500;
+    color: #262626;
+    white-space: nowrap;
+  }
+
+  /* --- Footer tổng tiền --- */
+  .ant-table-footer {
+    background: #fff;
+    padding: 16px;
+    border-top: 2px solid #f0f0f0;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 20px;
+
+    .label {
+      font-size: 16px;
+      color: #8c8c8c;
+    }
+
+    .value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #ff4d4f;
+      /* Màu đỏ cam để nhấn mạnh số tiền */
+    }
+  }
+}
+
+/* Nút xóa sản phẩm */
+[nz-button][nzDanger] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+
+  &:hover {
+    background: #fff1f0;
+    border-color: #ff4d4f;
+  }
+}
+
+/* Responsive cho mobile nếu bảng quá rộng */
+@media (max-width: 768px) {
+  .form-section {
+    nz-table {
+      display: block;
+      overflow-x: auto;
+    }
+  }
+}

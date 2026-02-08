@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { HEADER_CONSTANTS } from '../constants';
 import { HttpClient } from '@angular/common/http';
 import { throwError } from 'rxjs';
+import { createUrl } from './util';
+import { ROUTER_CONSTANTS } from '../constants/api-router.constant';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -21,28 +23,34 @@ export class AuthService {
 
     // KIỂM TRA: Nếu không có token, khỏi gọi API tốn tài nguyên
     if (!token) {
-      console.log('Token đã mất, chỉ xóa dữ liệu máy khách...');
+      ('Token đã mất, chỉ xóa dữ liệu máy khách...');
       this.clearClientData();
       return;
     }
 
     // Nếu còn token, gọi API để Server hủy session
-    this.http.post('/api/auth/logout', {}).subscribe({
+    this.http.post(createUrl('auth/logout'), {}).subscribe({
       next: () => {
-        console.log('Server đã hủy session thành công');
+        ('Server đã hủy session thành công');
       },
       error: (err) => {
         // Dù lỗi (vì token hết hạn chẳng hạn) vẫn phải xóa máy khách
         console.error('Server logout lỗi nhưng vẫn xóa máy khách', err);
-      },
-      complete: () => {
+
         this.clearClientData();
       },
     });
   }
 
   private clearClientData() {
+    const deviceId = localStorage.getItem(HEADER_CONSTANTS.DEVICE_ID) || null;
+
     localStorage.clear(); // Xóa sạch rác
+
+    if (deviceId) {
+      localStorage.setItem(HEADER_CONSTANTS.DEVICE_ID, deviceId); // Giữ lại deviceId
+    }
+
     this.currentUser.set(null);
     this.router.navigate(['/login']);
   }
@@ -62,8 +70,7 @@ export class AuthService {
     });
   }
 
-  private apiUrl = 'http://localhost:3001/api';
-
+  private apiUrl = ROUTER_CONSTANTS.HOST;
   // auth.service.ts
   refreshTokenApi(refreshToken: string) {
     if (!refreshToken) return throwError(() => new Error('No refresh token'));

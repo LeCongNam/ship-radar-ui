@@ -32,4 +32,7 @@ export interface Order {
   shop?: Shop;
   orderItems: OrderItem[];
   shippings?: Shipping[];
+
+  orderBarcode: string;
+  orderBarcodeFilter?: string;
 }

@@ -34,7 +34,7 @@ export const createUrl = (url: string, options?: UrlOptions) => {
     return `${HOST}${urlResult}?${queryParams.toString()}`;
   }
 
-  console.log({
+  ({
     host: HOST,
     URL: urlResult,
   });

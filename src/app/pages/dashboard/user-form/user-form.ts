@@ -11,6 +11,7 @@ import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { HttpClient } from '@angular/common/http';
+import { NzUploadChangeParam, NzUploadModule } from 'ng-zorro-antd/upload';
 
 @Component({
   selector: 'app-user-form',
@@ -24,6 +25,8 @@ import { HttpClient } from '@angular/common/http';
     NzCheckboxModule,
     NzDatePickerModule,
     NzGridModule,
+    // NzUploadChangeParam,
+    NzUploadModule,
   ],
   templateUrl: './user-form.html',
   styleUrl: './user-form.scss',
@@ -169,6 +172,17 @@ export class UserFormPage implements OnInit {
           control.updateValueAndValidity({ onlySelf: true });
         }
       });
+    }
+  }
+
+  handleChange(info: NzUploadChangeParam): void {
+    if (info.file.status !== 'uploading') {
+      console.log(info.file, info.fileList);
+    }
+    if (info.file.status === 'done') {
+      this.message.success(`${info.file.name} file uploaded successfully`);
+    } else if (info.file.status === 'error') {
+      this.message.error(`${info.file.name} file upload failed.`);
     }
   }
 

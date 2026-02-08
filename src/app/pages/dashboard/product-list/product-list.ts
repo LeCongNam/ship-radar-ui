@@ -21,10 +21,14 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { HttpClient } from '@angular/common/http';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { createUrl } from '../../../../shared';
 import { ROUTER_CONSTANTS } from '../../../../constants/api-router.constant';
+import { STOCK_STATUS } from './product.constant';
 
 interface Product {
   id: string;
@@ -38,6 +42,9 @@ interface Product {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+
+  productCode: string;
+  productCodeFilter: string;
 }
 
 @Component({
@@ -59,6 +66,7 @@ interface Product {
     NzInputModule,
     NzCheckboxModule,
     NzInputNumberModule,
+    NzSelectModule,
     RouterLink,
   ],
   templateUrl: './product-list.html',
@@ -75,15 +83,23 @@ export class ProductListPage {
   pageIndex = 1;
   pageSize = 10;
   total = 0;
+  stockStatus: STOCK_STATUS = STOCK_STATUS.ALL;
   searchText = '';
+  private searchSubject = new Subject<string>();
 
   drawerVisible = false;
   drawerTitle = '';
   selectedProduct: Product | null = null;
   isEditMode = false;
   editForm!: FormGroup;
+  isRefreshing = false;
 
   ngOnInit() {
+    this.searchSubject.pipe(debounceTime(500), distinctUntilChanged()).subscribe((value) => {
+      this.searchText = value;
+      this.pageIndex = 1;
+      this.loadData();
+    });
     this.initEditForm();
     this.loadData();
   }
@@ -101,38 +117,51 @@ export class ProductListPage {
 
   loadData() {
     this.loading = true;
+    const tempListData = structuredClone<Product[]>(this.listOfData);
+    this.listOfData = [];
+    this.isRefreshing = true;
 
     setTimeout(() => {
+      let query = {
+        page: this.pageIndex,
+        pageSize: this.pageSize,
+        ...(this.stockStatus !== 'all' ? { stockStatus: this.stockStatus } : {}),
+        ...(this.searchText?.length > 0 ? { search: this.searchText } : {}),
+      };
+
       this.http
-        .get<{
-          data: Product[];
-          meta: { page: number; pageSize: number; total: number };
-        }>(
+        .get<ResponseWiPagination<Product>>(
           createUrl(ROUTER_CONSTANTS.DASHBOARD.PRODUCTS.LIST, {
-            query: {
-              page: this.pageIndex,
-              pageSize: this.pageSize,
-              // search: this.searchText,
-            },
+            query,
           }),
         )
         .subscribe({
-          next: (data) => {
-            this.listOfData = data.data;
-            this.total = data.meta.total;
+          next: (res) => {
+            res;
+
+            this.listOfData = res.data;
+            this.total = res.metadata.total;
             this.loading = false;
+            this.isRefreshing = false;
           },
           error: () => {
             this.loading = false;
+            this.listOfData = tempListData;
+            this.message.error('Tải danh sách sản phẩm thất bại');
+            this.isRefreshing = false;
           },
         });
 
       this.total = 100;
       this.loading = false;
-    }, 500);
+    }, 1500);
   }
 
   onSearch() {
+    this.searchSubject.next(this.searchText);
+  }
+
+  onFilterChange() {
     this.pageIndex = 1;
     this.loadData();
   }
@@ -199,5 +228,11 @@ export class ProductListPage {
 
   delete(id: string) {
     this.message.success('Xóa thành công');
+  }
+
+  compareDates(date1: string, date2: string): boolean {
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+    return d1.getTime() !== d2.getTime();
   }
 }

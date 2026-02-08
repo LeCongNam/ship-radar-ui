@@ -7,7 +7,7 @@ import {
   Validators,
   FormsModule,
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { DashboardLayout } from '../../../components/layouts/dashboard/dashboard-layout.module';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -23,9 +23,11 @@ import { ROUTER_CONSTANTS } from '../../../../constants/api-router.constant';
 import { createUrl } from '../../../../shared';
 import { Product } from '../../../models/product.model';
 import { Shop } from '../../../models/shop.model';
+import { ORDER_CONSTANTS } from '../../../../constants/order.constant';
 
 @Component({
-  selector: 'app-dashboard-order-create',
+  selector: 'app-dashboard-order-form',
+  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -39,23 +41,29 @@ import { Shop } from '../../../models/shop.model';
     NzIconModule,
     NzInputNumberModule,
   ],
-  templateUrl: './dashboard-order-create.html',
-  styleUrl: './dashboard-order-create.scss',
+  templateUrl: './dashboard-order-form.html',
+  styleUrls: ['./dashboard-order-form.scss'],
 })
-export class DashboardOrderCreate implements OnInit {
+export class DashboardOrderFormPage implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
   private message = inject(NzMessageService);
 
   orderForm!: FormGroup;
   loading = false;
+  orderId: string | null = null;
+  isViewMode = false;
+  pageTitle = 'Tạo đơn hàng mới';
 
   shops: Shop[] = [];
   products: Product[] = [];
 
   shopsLoading = false;
   productsLoading = false;
+
+  orderStatusOptions = ORDER_CONSTANTS.STATUS;
 
   get orderItems(): FormArray {
     return this.orderForm.get('orderItems') as FormArray;
@@ -72,6 +80,13 @@ export class DashboardOrderCreate implements OnInit {
     this.initForm();
     this.loadShops();
     this.loadProducts();
+
+    this.orderId = this.route.snapshot.paramMap.get('id');
+    if (this.orderId) {
+      this.isViewMode = true;
+      this.pageTitle = 'Chi tiết đơn hàng';
+      this.loadOrder(this.orderId);
+    }
   }
 
   initForm() {
@@ -85,8 +100,7 @@ export class DashboardOrderCreate implements OnInit {
       orderItems: this.fb.array([], [Validators.required]),
     });
 
-    // Add one empty item by default
-    this.addOrderItem();
+    // this.addOrderItem();
   }
 
   createOrderItem(): FormGroup {
@@ -115,20 +129,25 @@ export class DashboardOrderCreate implements OnInit {
     }
   }
 
+  trackByShop(index: number, item: Shop) {
+    return item.id;
+  }
+
+  trackByProduct(index: number, item: Product) {
+    return item.id;
+  }
+
   loadShops() {
     this.shopsLoading = true;
     this.http.get<{ data: Shop[] }>(createUrl(ROUTER_CONSTANTS.DASHBOARD.SHOPS.LIST)).subscribe({
       next: (res) => {
         this.shops = res.data || [];
-        // Pre-select first shop if available and nothing selected
-        if (this.shops.length > 0 && !this.orderForm.get('shopId')?.value) {
-          this.orderForm.patchValue({ shopId: this.shops[0].id });
-        }
         this.shopsLoading = false;
       },
-      error: () => {
-        this.message.error('Không thể tải danh sách cửa hàng');
+      error: (err) => {
         this.shopsLoading = false;
+        this.message.error('Không thể tải danh sách cửa hàng');
+        console.error('❌ loadShops error:', err);
       },
     });
   }
@@ -142,81 +161,77 @@ export class DashboardOrderCreate implements OnInit {
           this.products = res.data || [];
           this.productsLoading = false;
         },
-        error: () => {
-          this.message.error('Không thể tải danh sách sản phẩm');
+        error: (err) => {
           this.productsLoading = false;
+          this.message.error('Không thể tải danh sách sản phẩm');
+          console.error('❌ loadProducts error:', err);
         },
       });
+  }
+
+  loadOrder(id: string) {
+    this.loading = true;
+    this.http.get<any>(createUrl(`${ROUTER_CONSTANTS.DASHBOARD.ORDERS.CREATE}/${id}`)).subscribe({
+      next: (res) => {
+        this.loading = false;
+        const order = res.data;
+
+        this.orderForm.patchValue({
+          receiverName: order.receiverName,
+          receiverPhone: order.receiverPhone,
+          receiverAddress: order.receiverAddress,
+          noted: order.noted,
+          shopId: order.shopId,
+          status: order.status,
+        });
+
+        const itemsArray = this.orderForm.get('orderItems') as FormArray;
+        itemsArray.clear();
+
+        order.orderItems?.forEach((item: any) => {
+          itemsArray.push(
+            this.fb.group({
+              productId: [item.productId, Validators.required],
+              quantity: [item.quantity, [Validators.required, Validators.min(1)]],
+              price: [Number(item.price), [Validators.required, Validators.min(0)]],
+            }),
+          );
+        });
+      },
+      error: (err) => {
+        this.loading = false;
+        this.message.error('Không thể tải thông tin đơn hàng');
+        console.error('❌ loadOrder error:', err);
+      },
+    });
   }
 
   onSubmit() {
-    if (this.orderForm.valid) {
-      if (this.orderItems.length === 0) {
-        this.message.error('Vui lòng thêm ít nhất một sản phẩm');
-        return;
-      }
-
-      this.loading = true;
-      const formValue = this.orderForm.value;
-
-      const formData = {
-        receiverName: formValue.receiverName,
-        receiverPhone: formValue.receiverPhone,
-        receiverAddress: formValue.receiverAddress,
-        noted: formValue.noted,
-        shopId: formValue.shopId,
-        status: formValue.status,
-        orderItems: formValue.orderItems.map((item: any) => ({
-          productId: item.productId,
-          quantity: item.quantity,
-          price: item.price,
-        })),
-        totalPrice: this.totalAmount,
-      };
-
-      console.log('Submitting Order Payload:', formData);
-
-      this.http.post(createUrl(ROUTER_CONSTANTS.DASHBOARD.ORDERS.CREATE), formData).subscribe({
-        next: () => {
-          this.message.success('Tạo đơn hàng thành công');
-          this.router.navigate([ROUTER_CONSTANTS.DASHBOARD.ORDERS.LIST]);
-        },
-        error: (err) => {
-          console.error('Error creating order:', err);
-          const errorMessage = err.error?.message || 'Tạo đơn hàng thất bại';
-          this.message.error(errorMessage);
-          this.loading = false;
-        },
-      });
-    } else {
-      console.log('Form Invalid. Errors:', this.orderForm.errors);
-      Object.keys(this.orderForm.controls).forEach((key) => {
-        const control = this.orderForm.get(key);
-        if (control?.invalid) {
-          console.log(`Control ${key} invalid:`, control.errors);
-          control.markAsDirty();
-          control.updateValueAndValidity({ onlySelf: true });
-        }
-      });
-
-      // Also mark array items
-      this.orderItems.controls.forEach((group, index) => {
-        if (group instanceof FormGroup) {
-          Object.keys(group.controls).forEach((key) => {
-            const control = group.get(key);
-            if (control?.invalid) {
-              console.log(`OrderItem ${index} - Control ${key} invalid:`, control.errors);
-              control.markAsDirty();
-              control.updateValueAndValidity();
-            }
-          });
-        }
-      });
+    if (!this.orderForm.valid) {
       this.message.warning('Vui lòng kiểm tra lại thông tin đơn hàng');
+      return;
     }
+
+    const formValue = this.orderForm.value;
+    const formData = {
+      ...formValue,
+      orderItems: formValue.orderItems,
+      totalPrice: this.totalAmount,
+    };
+
+    this.http.post(createUrl(ROUTER_CONSTANTS.DASHBOARD.ORDERS.CREATE), formData).subscribe({
+      next: (res) => {
+        this.message.success('Tạo đơn hàng thành công');
+        this.goBack();
+      },
+      error: (err) => {
+        console.error('❌ Error creating order:', err);
+        this.message.error('Tạo đơn hàng thất bại');
+      },
+    });
   }
 
   goBack() {
-    this.router.navigate([ROUTER_CONSTANTS.DASHBOARD.ORDERS.LIST]);
+    this.router.navigate(['/dashboard/orders/list']);
   }
 }

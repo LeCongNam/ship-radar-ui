@@ -1,0 +1,145 @@
+<app-dashboard-layout>
+  <div class="page-header">
+    <h2>Quản lý đơn hàng</h2>
+  </div>
+
+  <div class="button-add-box">
+    <div class="box-search">
+      <input
+        nz-input
+        placeholder="Tìm kiếm đơn hàng (Mã, Tên KH, SĐT)..."
+        [(ngModel)]="searchText"
+        (ngModelChange)="onSearch()"
+      />
+      <div class="search-box">
+        <nz-icon nzType="search" nzTheme="outline" class="icon-search"></nz-icon>
+      </div>
+    </div>
+
+    <div style="flex: 1"></div>
+
+    <button nz-button nzType="primary" (click)="navigateToCreate()">
+      <nz-icon nzType="plus" nzTheme="outline" />
+      Tạo đơn hàng
+    </button>
+  </div>
+
+  <div class="filter" style="margin-bottom: 16px">
+    <nz-select
+      [(ngModel)]="statusFilter"
+      (ngModelChange)="onFilterChange()"
+      style="width: 200px"
+      nzPlaceHolder="Trạng thái đơn hàng"
+    >
+      <nz-option nzValue="all" nzLabel="Tất cả trạng thái"></nz-option>
+      <nz-option nzValue="PENDING" nzLabel="Chờ xử lý"></nz-option>
+      <nz-option nzValue="PROCESSING" nzLabel="Đang xử lý"></nz-option>
+      <nz-option nzValue="SHIPPING" nzLabel="Đang giao hàng"></nz-option>
+      <nz-option nzValue="DELIVERED" nzLabel="Đã giao hàng"></nz-option>
+      <nz-option nzValue="CANCELLED" nzLabel="Đã hủy"></nz-option>
+    </nz-select>
+
+    <nz-icon
+      nz-icon
+      nzType="sync"
+      [nzSpin]="isRefreshing"
+      (click)="loadData()"
+      class="icon-refresh"
+      nz-tooltip
+      nzTooltipTitle="Làm mới dữ liệu"
+    ></nz-icon>
+  </div>
+
+  <div>
+    <nz-table
+      #basicTable
+      [nzData]="listOfData"
+      [nzLoading]="loading"
+      nzShowPagination="false"
+      nzBordered
+    >
+      <thead>
+        <tr>
+          <th>Mã đơn hàng</th>
+          <th>Khách hàng</th>
+          <th>Cửa hàng</th>
+          <th>Tổng tiền</th>
+          <th>Trạng thái</th>
+          <th>Ngày tạo</th>
+          <th colSpan="2">Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (data of basicTable.data; track data.id) {
+          <tr>
+            <td class="order-barcode">
+              <a [routerLink]="['/dashboard/orders', data.id]">{{ data.orderBarcode }}</a>
+
+              <nz-icon
+                nzType="copy"
+                nzTheme="outline"
+                class="icon-copy"
+                (click)="copyToClipboard(data.orderBarcode)"
+                nzTooltip="Copy order barcode"
+              />
+            </td>
+            <td>
+              <div>
+                <strong>{{ data.receiverName }}</strong>
+              </div>
+              <div style="font-size: 12px; color: #888">{{ data.receiverPhone }}</div>
+              <div style="font-size: 12px; color: #888" [title]="data.receiverAddress">
+                {{ data.receiverAddress | slice: 0 : 30
+                }}{{ data.receiverAddress.length > 30 ? '...' : '' }}
+              </div>
+            </td>
+            <td>{{ data.shop?.name || '-' }}</td>
+            <td style="font-weight: 500">{{ data.totalPrice | number: '1.0-0' }} đ</td>
+            <td>
+              <nz-select
+                nzShowSearch
+                [nzLoading]="loading"
+                style="min-width: 100%"
+                [ngModel]="data.status"
+                (ngModelChange)="updateStatus(data.id, $event)"
+              >
+                @for (p of orderStatusOptions; track $index) {
+                  <nz-option [nzValue]="p.value" [nzLabel]="p.label"></nz-option>
+                }
+              </nz-select>
+            </td>
+            <td>{{ data.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td class="action">
+              <a [routerLink]="['/dashboard/orders', data.id]">Chi tiết</a>
+
+              <button
+                nz-button
+                nzType="primary"
+                (click)="shipOrder(data.id)"
+                nz-tooltip
+                [nzLoading]="isShipping(data.id)"
+                nzTooltipTitle="Chuyển sang giao hàng"
+                [disabled]="data.status === 'SHIPPING'"
+              >
+                <nz-icon nzType="truck" nzTheme="outline" />
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </div>
+
+  <div class="pagination">
+    <nz-pagination
+      [nzPageIndex]="pageIndex"
+      [nzTotal]="total"
+      [nzPageSize]="pageSize"
+      [nzPageSizeOptions]="[10, 20, 50]"
+      (nzPageIndexChange)="onPageChange($event)"
+      (nzPageSizeChange)="onPageSizeChange($event)"
+      [nzShowSizeChanger]="true"
+    >
+    </nz-pagination>
+  </div>
+</app-dashboard-layout>

@@ -14,6 +14,10 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { HttpClient } from '@angular/common/http';
 import { createUrl } from '../../../../shared';
 import { ROUTER_CONSTANTS } from '../../../../constants/api-router.constant';
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { FormatPricePipe } from './format-price-pipe';
+import { concatMap } from 'rxjs';
 
 @Component({
   selector: 'app-product-form',
@@ -28,6 +32,9 @@ import { ROUTER_CONSTANTS } from '../../../../constants/api-router.constant';
     NzInputNumberModule,
     NzSelectModule,
     NzGridModule,
+    NzTooltipModule,
+    NzIconModule,
+    // FormatPricePipe,
   ],
   templateUrl: './product-form.html',
   styleUrl: './product-form.scss',
@@ -38,6 +45,7 @@ export class ProductFormPage implements OnInit {
   private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
   private message = inject(NzMessageService);
+  private readonly SAFE_CHARS = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
 
   productForm!: FormGroup;
   loading = false;
@@ -64,6 +72,41 @@ export class ProductFormPage implements OnInit {
       description: [''],
       isActive: [true],
     });
+
+    this.productForm.get('name')?.valueChanges.subscribe((name) => {
+      if (!this.isEditMode) {
+        // Chỉ tự động sinh mã khi tạo mới
+        this.generateAutoSku(name);
+      }
+    });
+  }
+
+  generateAutoSku(name: string): void {
+    if (!name) {
+      this.productForm.get('sku')?.patchValue('');
+      return;
+    }
+
+    // 1. Lấy tiền tố: Chuyển tiếng Việt có dấu thành không dấu, lấy các chữ cái đầu
+    const prefix = name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Khử dấu
+      .split(' ')
+      .filter((word) => word.length > 0)
+      .map((word) => word[0].toUpperCase())
+      .join('')
+      .slice(0, 4); // Lấy tối đa 4 ký tự đầu
+
+    // 2. Sinh Suffix: 4 ký tự ngẫu nhiên để phục vụ Index nhanh nhất
+    let suffix = '';
+    for (let i = 0; i < 4; i++) {
+      suffix += this.SAFE_CHARS.charAt(Math.floor(Math.random() * this.SAFE_CHARS.length));
+    }
+
+    const finalSku = `${prefix}-${suffix}`;
+
+    // 3. Update vào form
+    this.productForm.get('sku')?.patchValue(finalSku, { emitEvent: false });
   }
 
   loadCategories() {
@@ -118,6 +161,8 @@ export class ProductFormPage implements OnInit {
       this.loading = true;
       const formData = { ...this.productForm.value };
 
+      let isSuccess = false;
+
       if (this.isEditMode && this.productId) {
         this.http
           .patch(
@@ -127,26 +172,73 @@ export class ProductFormPage implements OnInit {
             formData,
           )
           .subscribe({
-            error: (error) => {
-              this.message.error('Đã có lỗi xảy ra. Vui lòng thử lại.');
+            next: () => {
+              this.message
+                .loading('Đang cập nhật sản phẩm', { nzDuration: 1000 })
+                .onClose!.pipe(
+                  concatMap(
+                    () =>
+                      this.message.success('Cập nhật sản phẩm thành công', { nzDuration: 2500 })
+                        .onClose!,
+                  ),
+                )
+                .subscribe();
+              isSuccess = true;
+            },
+            error: (responseError) => {
+              this.message
+                .loading('Đang cập nhật sản phẩm', { nzDuration: 1000 })
+                .onClose!.pipe(
+                  concatMap(
+                    () =>
+                      this.message.error(
+                        `Cập nhật sản phẩm thất bại: ${responseError.error.message}`,
+                        {
+                          nzDuration: 5000,
+                        },
+                      ).onClose!,
+                  ),
+                )
+                .subscribe();
               this.loading = false;
             },
           });
       } else {
         this.http.post(createUrl(ROUTER_CONSTANTS.DASHBOARD.PRODUCTS.CREATE), formData).subscribe({
-          error: (error) => {
-            this.message.error('Đã có lỗi xảy ra. Vui lòng thử lại.');
+          next: () => {
+            this.message
+              .loading('Đang tạo sản phẩm', { nzDuration: 1000 })
+              .onClose!.pipe(
+                concatMap(
+                  () =>
+                    this.message.success('Tạo sản phẩm thành công', { nzDuration: 2500 }).onClose!,
+                ),
+              )
+              .subscribe();
+            isSuccess = true;
+          },
+          error: (responseError) => {
+            this.message
+              .loading('Đang tạo sản phẩm', { nzDuration: 1000 })
+              .onClose!.pipe(
+                concatMap(
+                  () =>
+                    this.message.error(`Tạo sản phẩm thất bại: ${responseError.error.message}`, {
+                      nzDuration: 5000,
+                    }).onClose!,
+                ),
+              )
+              .subscribe();
             this.loading = false;
           },
         });
       }
 
       setTimeout(() => {
-        this.message.success(
-          this.isEditMode ? 'Cập nhật sản phẩm thành công' : 'Tạo sản phẩm thành công',
-        );
+        if (isSuccess) {
+          this.goBack();
+        }
         this.loading = false;
-        this.goBack();
       }, 500);
     } else {
       Object.values(this.productForm.controls).forEach((control) => {
@@ -157,6 +249,20 @@ export class ProductFormPage implements OnInit {
       });
     }
   }
+
+  // Chuyển thành số để hiển thị dấu chấm phân cách hàng nghìn
+  formatterCurrency = (value: number | string): string => {
+    if (!value && value !== 0) return '';
+    return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
+
+  // Phải trả về number để khớp với yêu cầu của nz-input-number
+  parserCurrency = (value: string): number => {
+    if (!value) return 0;
+    // Loại bỏ tất cả ký tự không phải số rồi ép kiểu thành Number
+    const parsedValue = Number(value.replace(/\D/g, ''));
+    return isNaN(parsedValue) ? 0 : parsedValue;
+  };
 
   goBack() {
     this.router.navigate(['/dashboard/products']);
